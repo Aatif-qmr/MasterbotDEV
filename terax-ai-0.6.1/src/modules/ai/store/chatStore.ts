@@ -20,22 +20,15 @@ import {
 } from "../lib/sessions";
 import { GeminiSession, createTeraxGeminiAgent } from "../lib/gemini/session";
 import { GeminiEventType } from "../lib/gemini/types";
+import type { UIMessage, UIMessagePart, ChatStatus, TeraxToolCall } from "../engine/types";
 
-// Minimal UIMessage type replacement
-export type UIMessage = {
-  id: string;
-  role: "user" | "assistant" | "system" | "data";
-  content: string;
-  parts?: any[];
-};
-
-export type ChatStatus = "idle" | "thinking" | "streaming" | "submitted" | "error";
+export type { UIMessage, UIMessagePart, ChatStatus, TeraxToolCall };
 
 /**
  * Local Chat class replacement for Vercel AI SDK's Chat
  */
-export class Chat<T extends UIMessage = UIMessage> {
-  public messages: T[] = [];
+export class Chat {
+  public messages: UIMessage[] = [];
   public status: ChatStatus = "idle";
   public error: Error | undefined;
   public id: string;
@@ -47,7 +40,7 @@ export class Chat<T extends UIMessage = UIMessage> {
 
   constructor(options: {
     id: string;
-    messages?: T[];
+    messages?: UIMessage[];
     onStep?: (step: string | null) => void;
     onError?: (error: Error) => void;
   }) {
@@ -64,27 +57,36 @@ export class Chat<T extends UIMessage = UIMessage> {
     }
   }
 
-  async sendMessage(input: { text?: string; parts?: any[] }) {
+  async sendMessage(input: { text?: string; parts?: UIMessagePart[] }) {
     await this.initialize();
     
-    const content = input.text || (input.parts?.[0]?.type === 'text' ? (input.parts[0] as any).text : '');
-    const userMsg = {
+    let content = input.text || "";
+    if (!content && input.parts) {
+      for (const p of input.parts) {
+        if (p.type === 'text') {
+          content = p.text;
+          break;
+        }
+      }
+    }
+
+    const userMsg: UIMessage = {
       id: `msg-${Date.now()}`,
       role: "user",
       content,
       parts: input.parts || [{ type: "text", text: content }],
-    } as T;
+    };
     
     this.messages = [...this.messages, userMsg];
     this.status = "submitted";
     this.notify();
 
-    const assistantMsg = {
+    const assistantMsg: UIMessage = {
       id: `msg-${Date.now() + 1}`,
       role: "assistant",
       content: "",
       parts: [],
-    } as unknown as T;
+    };
     
     this.messages = [...this.messages, assistantMsg];
     
@@ -92,13 +94,13 @@ export class Chat<T extends UIMessage = UIMessage> {
       this.status = "streaming";
       for await (const event of this.session!.sendStream(content)) {
         if (event.type === GeminiEventType.Content) {
-          (assistantMsg as any).content += event.value;
-          (assistantMsg as any).parts.push({ type: "text", text: event.value });
+          assistantMsg.content += String(event.value);
+          assistantMsg.parts.push({ type: "text", text: String(event.value) });
           this.messages = [...this.messages];
           this.notify();
         } else if (event.type === GeminiEventType.ToolCallRequest) {
-          const toolCall = event.value as any;
-          (assistantMsg as any).parts.push({
+          const toolCall = event.value as TeraxToolCall;
+          assistantMsg.parts.push({
             type: "tool-invocation",
             toolCallId: toolCall.callId,
             toolName: toolCall.name,
@@ -415,7 +417,7 @@ export const useChatStore = create<StoreState>((set, get) => ({
       return;
     }
     void loadMessages(id).then((m) => {
-      if (m && m.length > 0 && !chats.has(id)) seedMessages.set(id, m as any);
+      if (m && m.length > 0 && !chats.has(id)) seedMessages.set(id, m);
       flip();
     });
   },
@@ -465,7 +467,7 @@ export const useChatStore = create<StoreState>((set, get) => ({
       const entry = pendingPersist.get(id);
       if (!entry) return;
       pendingPersist.delete(id);
-      void saveMessages(id, entry.latest as any);
+      void saveMessages(id, entry.latest);
     }, PERSIST_DEBOUNCE_MS);
     pendingPersist.set(id, { latest: messages, timer });
     const sessions = get().sessions;
@@ -473,7 +475,7 @@ export const useChatStore = create<StoreState>((set, get) => ({
     if (!meta) return;
     const isUntitled = !meta.title || meta.title === "New chat";
     if (!isUntitled) return;
-    const nextTitle = deriveTitle(messages as any);
+    const nextTitle = deriveTitle(messages);
     if (nextTitle === meta.title) return;
     const next = sessions.map((s) =>
       s.id === id ? { ...s, title: nextTitle, updatedAt: Date.now() } : s,

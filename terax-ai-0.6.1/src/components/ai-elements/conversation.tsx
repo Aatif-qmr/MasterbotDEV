@@ -103,8 +103,8 @@ export const ConversationScrollButton = ({
 
 const getMessageText = (message: UIMessage): string =>
   (message.parts || [])
-    .filter((part): part is Extract<typeof part, { type: "text" }> => part.type === "text")
-    .map((part) => part.text)
+    .filter((part: any): part is Extract<typeof part, { type: "text" }> => part.type === "text")
+    .map((part: any) => part.text)
     .join("");
 
 export type ConversationDownloadProps = Omit<

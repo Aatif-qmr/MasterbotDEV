@@ -9,7 +9,6 @@ import {
   getOrCreateChat,
   useChatStore,
   type AgentRunStatus,
-  type UIMessage,
 } from "../store/chatStore";
 
 /**
@@ -58,7 +57,7 @@ function Bridge({
   setAiDiffStatus,
 }: { sessionId: string } & Props) {
   const chat = useMemo(() => getOrCreateChat(sessionId), [sessionId]);
-  const { status, messages, addToolApprovalResponse } = useChat<UIMessage>({
+  const { status, messages, addToolApprovalResponse } = useChat({
     chat,
   });
   const patch = useChatStore((s) => s.patchAgentMeta);

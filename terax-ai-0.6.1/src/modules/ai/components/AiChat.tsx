@@ -20,7 +20,7 @@ import { SLASH_COMMANDS, TERAX_CMD_RE } from "../lib/slashCommands";
 import { Spinner } from "@/components/ui/spinner";
 import { memo, useCallback } from "react";
 import { AiToolApproval } from "./AiToolApproval";
-import type { UIMessage, ChatStatus } from "../store/chatStore";
+import type { UIMessage, ChatStatus, UIMessagePart } from "../engine/types";
 
 function CommandSnippet({ name }: { name: string }) {
   const meta = SLASH_COMMANDS[name];
@@ -138,8 +138,8 @@ const RenderedMessage = memo(function RenderedMessage({
 }) {
   if (message.role === "user") {
     const rawText = (message.parts || [])
-      .filter((p): p is { type: "text"; text: string } => p.type === "text")
-      .map((p) => p.text)
+      .filter((p: UIMessagePart): p is Extract<UIMessagePart, { type: "text" }> => p.type === "text")
+      .map((p: Extract<UIMessagePart, { type: "text" }>) => p.text)
       .join("\n");
 
     const cmdMatch = rawText.match(TERAX_CMD_RE);
@@ -164,7 +164,7 @@ const RenderedMessage = memo(function RenderedMessage({
     <Message from={role as any}>
       <MessageContent>
         <div className="flex flex-col gap-3">
-          {(message.parts || []).map((part, i) => (
+          {(message.parts || []).map((part: UIMessagePart, i: number) => (
             <RenderedPart
               key={`${message.id}-${i}`}
               part={part as AnyPart}

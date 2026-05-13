@@ -1,16 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Chat, UIMessage } from '../store/chatStore';
+import { Chat } from '../store/chatStore';
+import type { UIMessage } from '../engine/types';
 
-export type UseChatOptions<T extends UIMessage> = {
-  chat: Chat<T>;
+export type UseChatOptions = {
+  chat: Chat;
 };
 
 /**
  * Local replacement for @ai-sdk/react's useChat
  */
-export function useChat<T extends UIMessage>(options: UseChatOptions<T>) {
+export function useChat(options: UseChatOptions) {
   const { chat } = options;
-  const [messages, setMessages] = useState<T[]>(chat.messages);
+  const [messages, setMessages] = useState<UIMessage[]>(chat.messages);
   const [status, setStatus] = useState(chat.status);
   const [error, setError] = useState(chat.error);
 
@@ -45,7 +46,7 @@ export function useChat<T extends UIMessage>(options: UseChatOptions<T>) {
     addToolApprovalResponse,
     append: (message: { content: string; role: 'user' }) => chat.sendMessage({ text: message.content }),
     stop: () => chat.stop(),
-    setMessages: (messages: T[]) => {
+    setMessages: (messages: UIMessage[]) => {
       chat.messages = messages;
       setMessages([...messages]);
     },

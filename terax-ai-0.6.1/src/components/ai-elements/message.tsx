@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { math } from "@streamdown/math";
-import type { UIMessage } from "@/modules/ai/store/chatStore";
+import type { UIMessage } from "@/modules/ai/engine/types";
 import type { ComponentProps, HTMLAttributes, ReactElement } from "react";
 import {
   createContext,

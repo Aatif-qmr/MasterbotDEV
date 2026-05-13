@@ -126,7 +126,7 @@ function Body({
   const step = useChatStore((s) => s.agentMeta.step);
 
   const chat = useMemo(() => getOrCreateChat(sessionId), [sessionId]);
-  const helpers = useChat<UIMessage>({ chat });
+  const helpers = useChat({ chat });
   const isBusy =
     helpers.status === "submitted" || helpers.status === "streaming";
 
