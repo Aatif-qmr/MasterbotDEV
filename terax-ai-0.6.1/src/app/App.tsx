@@ -15,7 +15,7 @@ import {
   useChatStore,
 } from "@/modules/ai";
 import { AiInputBarConnect } from "@/modules/ai/components/AiInputBar";
-import { AiComposerProvider } from "@/modules/ai/lib/composer";
+import { AiComposerProvider } from "@/modules/ai/core/composer";
 import { useAgentsStore } from "@/modules/ai/store/agentsStore";
 import { useSnippetsStore } from "@/modules/ai/store/snippetsStore";
 import {

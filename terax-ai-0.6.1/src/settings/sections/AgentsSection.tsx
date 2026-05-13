@@ -14,12 +14,12 @@ import {
   BUILTIN_AGENTS,
   type Agent,
   type AgentIconId,
-} from "@/modules/ai/lib/agents";
+} from "@/modules/ai/agents/registry";
 import {
   isValidHandle,
   normalizeHandle,
   type Snippet,
-} from "@/modules/ai/lib/snippets";
+} from "@/modules/ai/core/snippets";
 import { newAgentId, useAgentsStore } from "@/modules/ai/store/agentsStore";
 import {
   newSnippetId,

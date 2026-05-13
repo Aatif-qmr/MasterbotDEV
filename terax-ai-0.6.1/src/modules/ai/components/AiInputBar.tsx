@@ -12,9 +12,9 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { useComposer, type FileAttachment } from "../lib/composer";
-import { SLASH_COMMANDS } from "../lib/slashCommands";
-import type { Snippet } from "../lib/snippets";
+import { useComposer, type FileAttachment } from "../core/composer";
+import { SLASH_COMMANDS } from "../core/slashCommands";
+import type { Snippet } from "../core/snippets";
 import { useSnippetsStore } from "../store/snippetsStore";
 import { AgentSwitcher } from "./AgentSwitcher";
 import { SnippetPickerContent, type PickerItem } from "./SnippetPicker";

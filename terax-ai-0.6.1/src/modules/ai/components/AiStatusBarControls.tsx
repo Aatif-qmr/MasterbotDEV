@@ -37,7 +37,7 @@ import {
   type ModelId,
   type ProviderId,
 } from "../config";
-import { ACCEPTED_FILES, useComposer } from "../lib/composer";
+import { ACCEPTED_FILES, useComposer } from "../core/composer";
 import { useChatStore } from "../store/chatStore";
 
 const PROVIDER_ICON = {

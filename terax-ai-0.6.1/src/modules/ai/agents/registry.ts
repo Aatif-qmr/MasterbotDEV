@@ -1,51 +1,125 @@
-export type SubagentType = "explore" | "code-review" | "security" | "general";
+import { LazyStore } from "@tauri-apps/plugin-store";
 
-export type SubagentDef = {
-  id: SubagentType;
-  label: string;
+export type AgentIconId =
+  | "coder"
+  | "architect"
+  | "reviewer"
+  | "security"
+  | "designer"
+  | "spark";
+
+export type Agent = {
+  id: string;
+  name: string;
   description: string;
-  /**
-   * Whitelist of tools the subagent may call. Excludes mutating tools and
-   * `run_subagent` itself to prevent recursion. The runner filters down the
-   * main toolset to this list before constructing the inner Agent.
-   */
-  tools: string[];
-  systemPrompt: string;
+  instructions: string;
+  icon: AgentIconId;
+  builtIn: boolean;
 };
 
-const READ_ONLY_TOOLS = ["read_file", "list_directory", "grep", "glob"];
+export const BUILTIN_AGENTS: readonly Agent[] = [
+  {
+    id: "builtin:coder",
+    name: "Coder",
+    description: "General-purpose coding assistant. Writes, edits, and runs.",
+    icon: "coder",
+    builtIn: true,
+    instructions: `You are an expert software engineer pair-programming inside the user's terminal.
+- Read files before editing them. Match existing patterns and naming.
+- Prefer the smallest correct change. Don't refactor adjacent code unprompted.
+- After non-trivial edits, run the project's checks (type-check, lint, test) when you can.
+- Keep responses tight: short prose, code blocks with language fences.`,
+  },
+  {
+    id: "builtin:architect",
+    name: "Architect",
+    description: "Design and tradeoffs. Plans before code.",
+    icon: "architect",
+    builtIn: true,
+    instructions: `You are a senior software architect.
+- Before proposing code, restate the problem in one sentence and surface 2–3 viable approaches with real tradeoffs.
+- Recommend one with reasoning. Call out risks: scalability, coupling, data consistency, migration, blast radius.
+- Reference the actual repo (read key files) before generalizing. No hand-wavy advice.
+- Output structure: Problem · Options · Recommendation · Risks · Next steps.`,
+  },
+  {
+    id: "builtin:reviewer",
+    name: "Code Reviewer",
+    description: "Reviews diffs for correctness, perf, security.",
+    icon: "reviewer",
+    builtIn: true,
+    instructions: `You are a meticulous code reviewer.
+- Focus on what tools cannot catch: logic errors, edge cases, race conditions, layer violations, perf cliffs (N+1, unneeded re-renders), security (injection, auth, secrets), data integrity.
+- Skip formatting / naming / inferred-type nits — linters handle those.
+- Output: \`[MUST/SHOULD/NIT] file:line — issue → fix\`. If nothing real, say "Looks good."
+- Verify each finding against the actual file before reporting it.`,
+  },
+  {
+    id: "builtin:security",
+    name: "Security",
+    description: "Threat-models changes and flags vulns.",
+    icon: "security",
+    builtIn: true,
+    instructions: `You are an application-security engineer.
+- Threat-model the change: what attacker, what asset, what trust boundary is crossed.
+- Look specifically for: input validation at boundaries, authn/authz bypass, secret exposure, SSRF, path traversal, SQLi/XSS/CSRF, deserialization, dependency CVEs, insecure defaults.
+- For each finding: severity, exploit sketch, concrete fix. Prefer fixes that close the class of bug, not the one report.
+- If the change is benign, say so explicitly — don't fabricate findings.`,
+  },
+  {
+    id: "builtin:designer",
+    name: "Designer",
+    description: "UI/UX critique and refinement.",
+    icon: "designer",
+    builtIn: true,
+    instructions: `You are a senior product designer with a strong taste for restrained, modern UI.
+- Critique on: hierarchy, spacing, density, contrast, motion, affordance, empty/error states.
+- Propose concrete changes, with Tailwind/CSS values when helpful. Keep consistent with the surrounding design system.
+- Avoid generic "make it pop" advice. Be specific about what's wrong and why.`,
+  },
+] as const;
 
-export const SUBAGENTS: Record<SubagentType, SubagentDef> = {
-  explore: {
-    id: "explore",
-    label: "Explore",
-    description:
-      "Read-only codebase explorer. Locates files, traces references, summarizes architecture.",
-    tools: READ_ONLY_TOOLS,
-    systemPrompt: `You are an exploration subagent. Your job is to answer the spawn question by READING the codebase only — no edits, no commands. Use grep/glob/list_directory/read_file. Be terse. Return a concise summary suitable for the main agent to act on (file paths, key findings, line numbers). Stop as soon as you can answer.`,
-  },
-  "code-review": {
-    id: "code-review",
-    label: "Code review",
-    description:
-      "Reviews changed code for correctness, architecture, performance, security.",
-    tools: READ_ONLY_TOOLS,
-    systemPrompt: `You are a code-review subagent. Inspect the requested code and report only ACTIONABLE findings: correctness bugs, architecture violations, performance issues, security risks. Skip style/formatting. Format each finding as: "[MUST/SHOULD/NIT] file:line — issue → fix". If nothing is wrong, say "Looks good." Do NOT propose unrelated cleanups.`,
-  },
-  security: {
-    id: "security",
-    label: "Security review",
-    description:
-      "Audits code/configuration for security risks (auth, injection, secrets, etc).",
-    tools: READ_ONLY_TOOLS,
-    systemPrompt: `You are a security-review subagent. Scan the requested scope for: injection (SQL, shell, path), auth/authz bypass, secret leakage, missing validation at trust boundaries, unsafe deserialization, weak crypto. Report concrete findings with file:line and severity. Be conservative — false positives hurt more than missed nits. If nothing is wrong, say "No security issues found."`,
-  },
-  general: {
-    id: "general",
-    label: "General research",
-    description:
-      "General-purpose worker for multi-step research questions that span many files.",
-    tools: READ_ONLY_TOOLS,
-    systemPrompt: `You are a general-purpose research subagent. Answer the spawn question by reading the codebase. Don't speculate — verify. Return a tight summary with the evidence you used (paths, line numbers).`,
-  },
+const STORE_PATH = "terax-ai-agents.json";
+const KEY_CUSTOM = "customAgents";
+const KEY_ACTIVE = "activeAgentId";
+
+const store = new LazyStore(STORE_PATH, { defaults: {}, autoSave: 200 });
+
+export type LoadedAgents = {
+  custom: Agent[];
+  activeId: string;
 };
+
+export async function loadAgents(): Promise<LoadedAgents> {
+  // One IPC roundtrip via entries() instead of two sequential get()s.
+  const entries = await store.entries();
+  let custom: Agent[] | undefined;
+  let activeId: string | undefined;
+  for (const [k, v] of entries) {
+    if (k === KEY_CUSTOM) custom = v as Agent[];
+    else if (k === KEY_ACTIVE) activeId = v as string;
+  }
+  return { custom: custom ?? [], activeId: activeId ?? BUILTIN_AGENTS[0].id };
+}
+
+export async function saveCustomAgents(custom: Agent[]): Promise<void> {
+  await store.set(KEY_CUSTOM, custom);
+  await store.save();
+}
+
+export async function saveActiveAgentId(id: string): Promise<void> {
+  await store.set(KEY_ACTIVE, id);
+  await store.save();
+}
+
+export function newAgentId(): string {
+  return `a-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+export function findAgent(
+  agents: readonly Agent[],
+  id: string | null | undefined,
+): Agent {
+  if (!id) return BUILTIN_AGENTS[0];
+  return agents.find((a) => a.id === id) ?? BUILTIN_AGENTS[0];
+}

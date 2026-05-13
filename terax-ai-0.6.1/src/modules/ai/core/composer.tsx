@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { useWhisperRecording } from "../hooks/useWhisperRecording";
-import { expandSnippetTokens, type Snippet } from "../lib/snippets";
+import { expandSnippetTokens, type Snippet } from "../core/snippets";
 import { tryRunSlashCommand, type SlashCommandMeta } from "./slashCommands";
 import { getOrCreateChat, useChatStore } from "../store/chatStore";
 import { useSnippetsStore } from "../store/snippetsStore";

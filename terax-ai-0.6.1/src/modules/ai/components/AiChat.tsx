@@ -16,7 +16,7 @@ import {
 } from "@/components/ai-elements/reasoning";
 import { Tool } from "@/components/ai-elements/tool";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { SLASH_COMMANDS, TERAX_CMD_RE } from "../lib/slashCommands";
+import { SLASH_COMMANDS, TERAX_CMD_RE } from "../core/slashCommands";
 import { Spinner } from "@/components/ui/spinner";
 import { memo, useCallback } from "react";
 import { AiToolApproval } from "./AiToolApproval";

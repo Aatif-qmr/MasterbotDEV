@@ -11,7 +11,7 @@ export {
   clearKey,
   hasAnyKey,
   type ProviderKeys,
-} from "./lib/keyring";
+} from "./core/keyring";
 export {
   getActiveProviderKey,
   getOrCreateChat,

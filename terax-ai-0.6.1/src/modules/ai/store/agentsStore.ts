@@ -7,7 +7,7 @@ import {
   saveActiveAgentId,
   saveCustomAgents,
   type Agent,
-} from "../lib/agents";
+} from "../agents/registry";
 
 const CHANGED_EVENT = "terax://ai-agents-changed";
 

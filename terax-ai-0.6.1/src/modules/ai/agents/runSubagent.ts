@@ -1,12 +1,12 @@
 const Agent = class { constructor(public config: unknown) {} };
 const stepCountIs = (_count: number) => (_step: unknown) => false;
 import { DEFAULT_MODEL_ID, getModel, type ModelId } from "../config";
-import { buildLanguageModel } from "../lib/agent";
-import type { ProviderKeys } from "../lib/keyring";
+import { buildLanguageModel } from "../agents/agent";
+import type { ProviderKeys } from "../core/keyring";
 import type { ToolContext } from "../bridge/tools/context";
 import { buildFsTools } from "../bridge/tools/fs";
 import { buildSearchTools } from "../bridge/tools/search";
-import { SUBAGENTS, type SubagentType } from "./registry";
+import { SUBAGENTS, type SubagentType } from "./subagents";
 
 const SUBAGENT_MAX_STEPS = 12;
 

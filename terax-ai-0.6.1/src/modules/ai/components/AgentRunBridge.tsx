@@ -1,8 +1,8 @@
 import { useChat } from "../hooks/useChat";
 import { useEffect, useMemo, useRef } from "react";
 import type { AiDiffStatus } from "@/modules/tabs";
-import { native } from "../lib/native";
-import { checkReadable } from "../lib/security";
+import { native } from "../core/native";
+import { checkReadable } from "../core/security";
 import { resolvePath } from "../bridge/tools/tools";
 import {
   flushPersist,

@@ -20,7 +20,7 @@ import {
   type ModelId,
   type ProviderId,
 } from "@/modules/ai/config";
-import { clearKey, getAllKeys, setKey } from "@/modules/ai/lib/keyring";
+import { clearKey, getAllKeys, setKey } from "@/modules/ai/core/keyring";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import {
   emitKeysChanged,

@@ -18,7 +18,7 @@ import { GeminiEventType } from './gemini_types';
 import type { GeminiStreamChunk } from './types';
 import { GEMINI_SYSTEM_PROMPT } from './native';
 import { useChatStore } from '../store/chatStore';
-import { native } from '../lib/native';
+import { native } from '../core/native';
 import { buildTools, type ChatTools } from '../bridge/tools/tools';
 
 interface Skill {

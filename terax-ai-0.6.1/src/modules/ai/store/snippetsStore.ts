@@ -5,7 +5,7 @@ import {
   newSnippetId,
   saveSnippets,
   type Snippet,
-} from "../lib/snippets";
+} from "../core/snippets";
 
 const CHANGED_EVENT = "terax://ai-snippets-changed";
 

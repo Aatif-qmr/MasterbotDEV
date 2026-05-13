@@ -30,7 +30,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 import { useEffect, useMemo } from "react";
 import { getModel, getModelContextLimit } from "../config";
-import type { SessionMeta } from "../lib/sessions";
+import type { SessionMeta } from "../core/sessions";
 import { useAgentsStore } from "../store/agentsStore";
 import { getOrCreateChat, useChatStore, type UIMessage } from "../store/chatStore";
 import { usePlanStore } from "../store/planStore";

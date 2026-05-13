@@ -3,8 +3,8 @@ import {
   LMSTUDIO_DEFAULT_BASE_URL,
   type AutocompleteProviderId,
 } from "@/modules/ai/config";
-import { buildLanguageModel } from "@/modules/ai/lib/agent";
-import { EMPTY_PROVIDER_KEYS } from "@/modules/ai/lib/keyring";
+import { buildLanguageModel } from "@/modules/ai/agents/agent";
+import { EMPTY_PROVIDER_KEYS } from "@/modules/ai/core/keyring";
 const generateText = async (..._args: unknown[]) => ({ text: '' });
 import {
   buildUserPrompt,
