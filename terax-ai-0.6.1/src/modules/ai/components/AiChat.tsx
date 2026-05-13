@@ -18,15 +18,9 @@ import { Tool } from "@/components/ai-elements/tool";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SLASH_COMMANDS, TERAX_CMD_RE } from "../lib/slashCommands";
 import { Spinner } from "@/components/ui/spinner";
-import type {
-  ChatStatus,
-  DynamicToolUIPart,
-  ToolUIPart,
-  UIMessage,
-  UIMessagePart,
-} from "ai";
 import { memo, useCallback } from "react";
 import { AiToolApproval } from "./AiToolApproval";
+import type { UIMessage, ChatStatus } from "../store/chatStore";
 
 function CommandSnippet({ name }: { name: string }) {
   const meta = SLASH_COMMANDS[name];
@@ -55,8 +49,8 @@ function CommandSnippet({ name }: { name: string }) {
   );
 }
 
-type AnyToolPart = ToolUIPart | DynamicToolUIPart;
-type AnyPart = UIMessagePart<Record<string, never>, Record<string, never>>;
+type AnyToolPart = any;
+type AnyPart = any;
 
 type ApprovalArg = {
   id: string;
@@ -143,7 +137,7 @@ const RenderedMessage = memo(function RenderedMessage({
   onApproval: (id: string, approved: boolean) => void;
 }) {
   if (message.role === "user") {
-    const rawText = message.parts
+    const rawText = (message.parts || [])
       .filter((p): p is { type: "text"; text: string } => p.type === "text")
       .map((p) => p.text)
       .join("\n");
@@ -164,11 +158,13 @@ const RenderedMessage = memo(function RenderedMessage({
     );
   }
 
+  const role = message.role === "data" ? "system" : message.role;
+
   return (
-    <Message from={message.role}>
+    <Message from={role as any}>
       <MessageContent>
         <div className="flex flex-col gap-3">
-          {message.parts.map((part, i) => (
+          {(message.parts || []).map((part, i) => (
             <RenderedPart
               key={`${message.id}-${i}`}
               part={part as AnyPart}
@@ -237,7 +233,7 @@ const RenderedTool = memo(function RenderedTool({
   if (part.state === "approval-requested") {
     return (
       <AiToolApproval
-        part={part as Extract<ToolUIPart, { state: "approval-requested" }>}
+        part={part as any}
         toolName={toolName}
         onRespond={(approved) => onApproval(part.approval.id, approved)}
       />

@@ -1,4 +1,4 @@
-import type { UIMessage } from "@ai-sdk/react";
+import type { UIMessage } from "../store/chatStore";
 import { LazyStore } from "@tauri-apps/plugin-store";
 
 export type SessionMeta = {
@@ -64,7 +64,7 @@ export function newSessionId(): string {
 export function deriveTitle(messages: UIMessage[]): string {
   for (const m of messages) {
     if (m.role !== "user") continue;
-    for (const p of m.parts) {
+    for (const p of (m.parts || [])) {
       if (p.type !== "text") continue;
       const text = (p as { text: string }).text
         .replace(/<terminal-context[\s\S]*?<\/terminal-context>\s*/g, "")

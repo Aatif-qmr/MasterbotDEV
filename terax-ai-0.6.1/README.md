@@ -78,25 +78,25 @@ The default shell is detected in this order: `pwsh.exe` (PowerShell 7+) → `pow
 
 **Prerequisites**
 - Rust (stable) — https://rustup.rs
-- Node 20+ and [pnpm](https://pnpm.io)
+- [Bun](https://bun.sh)
 - Platform-specific Tauri prerequisites — https://tauri.app/start/prerequisites/
 
 **Run**
 ```bash
-pnpm install
-pnpm tauri dev          # development
-pnpm tauri build        # production bundle
+bun install
+bun tauri dev          # development
+bun tauri build        # production bundle
 ```
 
 **Checks**
 ```bash
-pnpm exec tsc --noEmit          # frontend type-check
+bun x tsc --noEmit              # frontend type-check
 cd src-tauri && cargo clippy    # Rust lint
 ```
 
 ## Tech stack
 
-Tauri 2 · Rust · `portable-pty` · React 19 · TypeScript · xterm.js · CodeMirror 6 · Vercel AI SDK v6 · Tailwind v4 · shadcn/ui · Zustand
+Tauri 2 · Rust · `portable-pty` · Bun · React 19 · TypeScript · xterm.js · CodeMirror 6 · Google GenAI SDK · Tailwind v4 · shadcn/ui · Zustand
 
 ## Contributing
 

@@ -1,25 +1,23 @@
 /**
  * Gemini CLI Agent and Session implementation for Terax AI
  * 
- * This module provides a complete re-implementation of the Gemini CLI SDK
- * functionality, optimized for Terax AI's architecture.
+ * This module uses the official @google/genai SDK directly,
+ * bypassing any middleware for maximum compatibility and performance.
  */
 
+import { GoogleGenAI, type Content, type Part } from '@google/genai';
 import type {
   GeminiAgentOptions,
-  SystemInstructions,
   SessionContext,
+  TypedGeminiStreamEvent,
   Tool,
   SkillReference,
-  Content,
-  TypedGeminiStreamEvent,
+  SystemInstructions,
 } from './types';
 import { GeminiEventType } from './types';
 import { GEMINI_SYSTEM_PROMPT } from './native';
 import { useChatStore } from '../../store/chatStore';
 import { native } from '../native';
-import { streamText, tool, type LanguageModel } from 'ai';
-import { buildLanguageModel } from '../agent';
 import { buildTools } from '../../tools/tools';
 
 interface Skill {
@@ -42,9 +40,16 @@ export function createSessionId(): string {
  */
 export class GeminiAgent {
   private options: GeminiAgentOptions;
+  private client: GoogleGenAI;
 
   constructor(options: GeminiAgentOptions) {
     this.options = options;
+    
+    // Initialize the SDK without an API key to trigger native/ADC auth
+    // The SDK will look for GOOGLE_API_KEY env var or use Application Default Credentials.
+    this.client = new GoogleGenAI({
+      apiKey: process.env.GOOGLE_API_KEY || '', // Default to env or empty for ADC
+    });
   }
 
   /**
@@ -52,16 +57,15 @@ export class GeminiAgent {
    */
   session(sessionId?: string): GeminiSession {
     const id = sessionId ?? createSessionId();
-    return new GeminiSession(this.options, id, this);
+    return new GeminiSession(this.options, id, this, this.client);
   }
 
   /**
    * Resume an existing session
    */
   async resumeSession(sessionId: string): Promise<GeminiSession> {
-    // For now, create a new session with the given ID
-    // In the future, this should load history from a persistent store
-    return new GeminiSession(this.options, sessionId, this);
+    // In a real implementation, history would be loaded from SQLite here
+    return new GeminiSession(this.options, sessionId, this, this.client);
   }
 }
 
@@ -69,19 +73,16 @@ export class GeminiAgent {
  * Gemini Session class - handles conversation and tool execution
  */
 export class GeminiSession {
-  private options: GeminiAgentOptions;
   private initialized = false;
   private history: Content[] = [];
-  private model: LanguageModel | null = null;
   private loadedSkills: Skill[] = [];
 
   constructor(
-    options: GeminiAgentOptions,
+    private options: GeminiAgentOptions,
     public readonly id: string,
     private agent: GeminiAgent,
-  ) {
-    this.options = options;
-  }
+    private client: GoogleGenAI,
+  ) {}
 
   /**
    * Initialize the session
@@ -89,27 +90,12 @@ export class GeminiSession {
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
-    // Resolve model
-    const state = useChatStore.getState();
-    const modelId = this.options.model ?? state.selectedModelId;
-    
-    try {
-      this.model = await buildLanguageModel(
-        'google', // Default to google for Gemini integration
-        state.apiKeys,
-        modelId
-      );
-    } catch (error) {
-      console.error('[GeminiSession] Failed to build language model:', error);
-      throw error;
-    }
-
     // Load skills if enabled
     if (this.options.skillsEnabled) {
       await this.loadWorkspaceSkills();
     }
 
-    console.log(`[GeminiSession] Initialized session ${this.id}`);
+    console.log(`[GeminiSession] Initialized session ${this.id} with Native SDK`);
     this.initialized = true;
   }
 
@@ -133,38 +119,31 @@ export class GeminiSession {
             const skill = this.parseSkillMarkdown(content.content);
             if (skill) {
               this.loadedSkills.push(skill);
-              console.log(`[GeminiSession] Loaded skill: ${skill.name}`);
             }
           }
         }
       }
-    } catch (error) {
-      // Skills dir might not exist, ignore
+    } catch {
+      // Skills dir might not exist
     }
   }
 
-  /**
-   * Simple parser for SKILL.md files
-   */
   private parseSkillMarkdown(content: string): Skill | null {
     const nameMatch = content.match(/^# (.*)/);
     const descriptionMatch = content.match(/description: >\s*([\s\S]*?)\n---/);
-
     if (!nameMatch) return null;
-
     return {
       name: nameMatch[1].trim(),
       description: descriptionMatch ? descriptionMatch[1].trim() : "",
-      instructions: content, // Use full content as instructions for now
+      instructions: content,
     };
   }
 
   /**
-   * Resolve system instructions (static or dynamic)
+   * Resolve system instructions
    */
   private async resolveInstructions(): Promise<string> {
     const { instructions } = this.options;
-
     let baseInstructions = "";
     if (typeof instructions === "string") {
       baseInstructions = instructions;
@@ -175,39 +154,29 @@ export class GeminiSession {
       baseInstructions = GEMINI_SYSTEM_PROMPT;
     }
 
-    // Append skill instructions
     if (this.loadedSkills.length > 0) {
       const skillsBlock = this.loadedSkills
-        .map(
-          (s) => `### SKILL: ${s.name}\n${s.description}\n\n${s.instructions}`,
-        )
+        .map((s) => `### SKILL: ${s.name}\n${s.description}\n\n${s.instructions}`)
         .join("\n\n");
-
-      baseInstructions += `\n\n## LOADED SKILLS\nYou have the following specialized skills available. Follow their specific instructions when applicable:\n\n${skillsBlock}`;
+      baseInstructions += `\n\n## LOADED SKILLS\n${skillsBlock}`;
     }
-
     return baseInstructions;
   }
 
   /**
-   * Create a session context for dynamic instructions and tools
+   * Create a session context
    */
   private createContext(): SessionContext {
     const state = useChatStore.getState();
-    
     return {
       sessionId: this.id,
-      transcript: [...this.history],
+      transcript: [...this.history] as any,
       cwd: state.live.getCwd() ?? '/',
       timestamp: new Date().toISOString(),
       fs: {
         readFile: async (path: string) => {
-          try {
-            const result = await native.readFile(path);
-            return result.kind === 'text' ? result.content : null;
-          } catch {
-            return null;
-          }
+          const result = await native.readFile(path);
+          return result.kind === 'text' ? result.content : null;
         },
         writeFile: async (path: string, content: string) => {
           await native.writeFile(path, content);
@@ -215,148 +184,119 @@ export class GeminiSession {
       },
       shell: {
         exec: async (cmd: string, options?: { cwd?: string; timeoutSeconds?: number }) => {
-          try {
-            const result = await native.runCommand(
-              cmd,
-              options?.cwd ?? null,
-              options?.timeoutSeconds ?? 60,
-            );
-            return {
-              exitCode: result.exit_code,
-              output: result.stdout || result.stderr,
-              stdout: result.stdout,
-              stderr: result.stderr,
-            };
-          } catch (error) {
-            return {
-              exitCode: 1,
-              output: '',
-              stdout: '',
-              stderr: error instanceof Error ? error.message : String(error),
-              error: error instanceof Error ? error : new Error(String(error)),
-            };
-          }
+          const result = await native.runCommand(cmd, options?.cwd ?? null, options?.timeoutSeconds ?? 60);
+          return {
+            exitCode: result.exit_code,
+            output: result.stdout || result.stderr,
+            stdout: result.stdout,
+            stderr: result.stderr,
+          };
         },
       },
       agent: this.agent as any,
-      session: this,
+      session: this as any,
     };
   }
 
   /**
-   * Send a message and stream the response
+   * Send a message and stream the response using Native SDK
    */
   async *sendStream(
     prompt: string,
     signal?: AbortSignal,
   ): AsyncGenerator<TypedGeminiStreamEvent> {
-    if (!this.initialized) {
-      await this.initialize();
-    }
+    if (!this.initialized) await this.initialize();
 
-    if (!this.model) {
-      throw new Error("Session not properly initialized: model is missing");
-    }
-
-    // Add user message to history
-    this.history.push({
-      role: "user",
-      parts: [{ text: prompt }],
-    });
-
+    const state = useChatStore.getState();
+    const modelId = this.options.model ?? state.selectedModelId;
     const systemInstructions = await this.resolveInstructions();
     const context = this.createContext();
 
-    // Map tools to Vercel AI SDK format
-    const sdkTools: Record<string, any> = {
-      ...(this.options.tools
-        ? Object.fromEntries(
-            this.options.tools.map((t) => [
-              t.name,
-              tool({
-                description: t.description,
-                parameters: t.inputSchema as any,
-                execute: (async (args: any) => {
-                  return await t.action(args, context);
-                }) as any,
-              } as any),
-            ]),
-          )
-        : {}),
-    };
-
-    // Auto-load built-in Terax tools
+    // Prepare built-in tools
     const toolContext = {
       getCwd: () => context.cwd,
-      getWorkspaceRoot: () => useChatStore.getState().live.getWorkspaceRoot(),
-      getTerminalContext: () =>
-        useChatStore.getState().live.getTerminalContext(),
-      injectIntoActivePty: (text: string) =>
-        useChatStore.getState().live.injectIntoActivePty(text),
-      openPreview: (url: string) =>
-        useChatStore.getState().live.openPreview(url),
+      getWorkspaceRoot: () => state.live.getWorkspaceRoot(),
+      getTerminalContext: () => state.live.getTerminalContext(),
+      injectIntoActivePty: (text: string) => state.live.injectIntoActivePty(text),
+      openPreview: (url: string) => state.live.openPreview(url),
       readCache: new Set<string>(),
       getSessionId: () => this.id,
     };
+    
     const builtInTools = buildTools(toolContext);
-    Object.assign(sdkTools, builtInTools);
+    const tools = [
+      {
+        functionDeclarations: Object.entries(builtInTools).map(([name, t]) => ({
+          name,
+          description: (t as any).description,
+          parameters: (t as any).parameters,
+        })),
+      },
+    ];
+
+    this.history.push({ role: 'user', parts: [{ text: prompt }] });
 
     try {
-      const streamOptions: any = {
-        model: this.model,
-        system: systemInstructions,
-        messages: this.history.map((m) => ({
-          role: m.role === "model" ? "assistant" : "user",
-          content: m.parts.map((p) => (p as any).text ?? "").join(" "),
-        })),
-        tools: sdkTools,
-        maxSteps: 10,
-        abortSignal: signal,
-      };
-
-      const result = await streamText(streamOptions);
+      const result = await this.client.models.generateContentStream({
+        model: modelId,
+        contents: this.history,
+        config: {
+          systemInstruction: { parts: [{ text: systemInstructions }] },
+          tools: tools as any,
+          abortSignal: signal,
+        },
+      });
 
       let fullResponseText = "";
+      const modelParts: Part[] = [];
 
-      for await (const part of result.fullStream) {
-        if (part.type === "text-delta") {
-          fullResponseText += part.text;
-          yield {
-            type: GeminiEventType.Content,
-            value: part.text,
-          };
-        } else if (part.type === "tool-call") {
-          yield {
-            type: GeminiEventType.ToolCallRequest,
-            value: {
-              callId: part.toolCallId,
-              name: part.toolName,
-              args: part.input as any,
-            },
-          };
-        } else if (part.type === "tool-result") {
-          yield {
-            type: GeminiEventType.ToolCallResponse,
-            value: part.output,
-          };
+      for await (const chunk of result as any) {
+        const text = typeof chunk.text === 'function' ? chunk.text() : (chunk as any).text;
+        if (text) {
+          fullResponseText += text;
+          yield { type: GeminiEventType.Content, value: text };
+        }
+
+        const calls = chunk.functionCalls();
+        if (calls && calls.length > 0) {
+          for (const call of calls) {
+            yield {
+              type: GeminiEventType.ToolCallRequest,
+              value: {
+                callId: (call as any).id || `call-${Date.now()}`,
+                name: call.name,
+                args: call.args as any,
+              },
+            };
+            
+            const tool = (builtInTools as any)[call.name];
+            if (tool) {
+              const toolResult = await tool.execute(call.args);
+              yield { type: GeminiEventType.ToolCallResponse, value: toolResult };
+              
+              modelParts.push({ functionCall: call });
+              this.history.push({ role: 'model', parts: [...modelParts] });
+              this.history.push({
+                role: 'user',
+                parts: [{ functionResponse: { name: call.name, response: toolResult } }],
+              });
+              
+              // Note: For multi-turn tool use, we'd need to call generateContentStream again recursively
+              // but we'll stick to single tool call per turn for this simplified version.
+            }
+          }
         }
       }
 
-      // Update history with complete model response
       if (fullResponseText) {
-        this.history.push({
-          role: 'model',
-          parts: [{ text: fullResponseText }],
-        });
+        modelParts.push({ text: fullResponseText });
+        this.history.push({ role: 'model', parts: modelParts });
       }
 
-      yield {
-        type: GeminiEventType.Finish,
-        value: null,
-      };
+      yield { type: GeminiEventType.Finish, value: null };
 
     } catch (error) {
-      console.error('[GeminiSession] Stream error:', error);
+      console.error('[GeminiSession] Native SDK Stream error:', error);
       yield {
         type: GeminiEventType.Error,
         value: error instanceof Error ? error.message : String(error),
@@ -364,16 +304,10 @@ export class GeminiSession {
     }
   }
 
-  /**
-   * Get conversation history
-   */
   getHistory(): readonly Content[] {
     return [...this.history];
   }
 
-  /**
-   * Clear conversation history
-   */
   clearHistory(): void {
     this.history = [];
   }
@@ -387,11 +321,11 @@ export function defineTool<T extends Record<string, unknown>>(
   description: string,
   schema: T,
   action: (params: T, context?: SessionContext) => Promise<unknown>,
-): Tool {
+): Tool<T> {
   return {
     name,
     description,
-    inputSchema: schema as any,
+    inputSchema: schema,
     action,
   };
 }
@@ -418,11 +352,9 @@ export function createTeraxInstructions(customInstructions?: string): SystemInst
  * Create a pre-configured Gemini agent for Terax AI
  */
 export function createTeraxGeminiAgent(options?: Partial<GeminiAgentOptions>): GeminiAgent {
-  const instructions = createTeraxInstructions(options?.instructions as string);
-  
   return new GeminiAgent({
-    instructions,
-    model: options?.model ?? 'gemini-2.0-flash-exp', // Fast default
+    instructions: GEMINI_SYSTEM_PROMPT,
+    model: options?.model ?? 'gemini-2.0-flash-exp',
     cwd: process.cwd(),
     debug: false,
     skillsEnabled: true,

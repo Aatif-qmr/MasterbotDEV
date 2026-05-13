@@ -23,7 +23,8 @@ import {
   ToolsIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import type { DynamicToolUIPart, ToolUIPart } from "ai";
+export type DynamicToolUIPart = any;
+export type ToolUIPart = any;
 import type { ComponentProps, ReactNode } from "react";
 import { isValidElement, memo, useState } from "react";
 

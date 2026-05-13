@@ -11,7 +11,7 @@ import {
   ToolsIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import type { ToolUIPart } from "ai";
+export type ToolUIPart = any;
 import { memo } from "react";
 
 type Props = {

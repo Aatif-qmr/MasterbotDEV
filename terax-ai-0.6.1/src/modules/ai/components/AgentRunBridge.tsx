@@ -1,5 +1,4 @@
-import { useChat, type UIMessage } from "@ai-sdk/react";
-import type { ToolUIPart, UIMessagePart } from "ai";
+import { useChat } from "../hooks/useChat";
 import { useEffect, useMemo, useRef } from "react";
 import type { AiDiffStatus } from "@/modules/tabs";
 import { native } from "../lib/native";
@@ -10,19 +9,12 @@ import {
   getOrCreateChat,
   useChatStore,
   type AgentRunStatus,
+  type UIMessage,
 } from "../store/chatStore";
 
 /**
  * Headless bridge that mirrors chat lifecycle into the store, so the status
  * pill / mini-window / panel can react without being inside the chat hook tree.
- *
- * Side effects:
- *  - Patches `agentMeta` on every status / approvals change.
- *  - Auto-opens the mini-window when an approval is pending — the user has
- *    to act on it; hiding it would be hostile.
- *  - For pending `write_file` calls, opens an AI diff tab in the editor area
- *    so the user can review the proposed change before approving.
- *  - Persists messages of the active session on every change.
  */
 
 type DiffOpenInput = {
@@ -46,12 +38,19 @@ export function AgentRunBridge(props: Props) {
 
 type WriteFileInput = { path?: unknown; content?: unknown };
 
-type ToolPartLike = ToolUIPart & {
-  approval?: { id: string };
+// Local replacements for AI SDK types
+type ToolPartLike = {
+  type: string;
+  state?: string;
+  approval?: { id: string; approved?: boolean };
   input?: WriteFileInput;
+  [key: string]: any;
 };
 
-type AnyPart = UIMessagePart<Record<string, never>, Record<string, never>>;
+type AnyPart = {
+  type: string;
+  [key: string]: any;
+};
 
 function Bridge({
   sessionId,
@@ -67,8 +66,6 @@ function Bridge({
   const persistMessages = useChatStore((s) => s.persistMessages);
   const setApprovalResponder = useChatStore((s) => s.setApprovalResponder);
 
-  // Expose the approval responder so the diff tab can resolve approvals.
-  // We keep it in a ref-stable closure so identity is stable per render.
   useEffect(() => {
     setApprovalResponder((id, approved) =>
       addToolApprovalResponse({ id, approved }),
@@ -80,8 +77,6 @@ function Bridge({
     persistMessages(sessionId, messages);
   }, [sessionId, messages, persistMessages]);
 
-  // Flush the debounced write whenever the chat goes idle (or errors),
-  // and on unmount, so a closed app or session-switch never loses the tail.
   useEffect(() => {
     if (status !== "submitted" && status !== "streaming") {
       flushPersist(sessionId);
@@ -95,6 +90,7 @@ function Bridge({
     let n = 0;
     for (const m of messages) {
       if (m.role !== "assistant") continue;
+      if (!m.parts) continue;
       for (const p of m.parts) {
         if ((p as { state?: string }).state === "approval-requested") n++;
       }
@@ -123,9 +119,6 @@ function Bridge({
     if (approvalsPending > 0) openMini();
   }, [approvalsPending, openMini]);
 
-  // ---- AI diff tab management ----------------------------------------------
-  // We track which approvalIds have already opened a tab so re-renders don't
-  // open duplicates. Reset when the session changes.
   const openedRef = useRef<Set<string>>(new Set());
   const fileMutationFingerprintRef = useRef<string>("");
   useEffect(() => {
@@ -133,15 +126,13 @@ function Bridge({
     fileMutationFingerprintRef.current = "";
   }, [sessionId]);
 
-  // Cheap fingerprint of file-mutation tool parts only. The diff-tab effect
-  // is the most expensive thing on the streaming path, so we skip it when
-  // only text/reasoning tokens have arrived (the common case).
   const fileMutationFingerprint = useMemo(() => {
     let fp = "";
     for (const m of messages) {
       if (m.role !== "assistant") continue;
+      if (!m.parts) continue;
       for (const p of m.parts as AnyPart[]) {
-        const t = (p as { type?: string }).type;
+        const t = p.type;
         if (
           t === "tool-write_file" ||
           t === "tool-edit" ||
@@ -161,10 +152,6 @@ function Bridge({
     type Pending = {
       approvalId: string;
       path: string;
-      /**
-       * Either a literal proposed content (write_file), or a function that
-       * derives proposed content from the on-disk original (edit/multi_edit).
-       */
       derive:
         | { kind: "literal"; content: string }
         | { kind: "edits"; edits: EditOp[] };
@@ -181,6 +168,7 @@ function Bridge({
 
     for (const m of messages) {
       if (m.role !== "assistant") continue;
+      if (!m.parts) continue;
       for (const part of m.parts as AnyPart[]) {
         const info = extractFileMutation(part);
         if (!info) continue;
@@ -191,9 +179,6 @@ function Bridge({
             pending.push({ approvalId, path, derive });
           }
         } else if (state === "approval-responded") {
-          // Response may carry an `approved` bit; if not present, leave the
-          // tab in pending — the next state transition (output-* below) will
-          // settle it.
           const approved = (part as { approval?: { approved?: boolean } })
             .approval?.approved;
           if (typeof approved === "boolean") {
@@ -219,7 +204,6 @@ function Bridge({
       const cwd = useChatStore.getState().live.getCwd();
       for (const p of pending) {
         if (cancelled) return;
-        // Mark as opened up-front so a re-render mid-await doesn't double-open.
         openedRef.current.add(p.approvalId);
         let abs: string;
         try {
@@ -235,8 +219,6 @@ function Bridge({
         } else {
           const r = applyEditsLocally(original.content, p.derive.edits);
           if (!r.ok) {
-            // Edit precondition failed (string not found / not unique).
-            // Skip opening the tab; the approval modal will surface the error.
             continue;
           }
           proposed = r.content;
@@ -276,7 +258,7 @@ type FileMutation =
     };
 
 function extractFileMutation(part: AnyPart): FileMutation | null {
-  const type = (part as { type?: string }).type;
+  const type = part.type;
   const p = part as ToolPartLike;
   const state = (p as { state?: string }).state ?? "";
   const approvalId = p.approval?.id ?? null;
@@ -360,15 +342,11 @@ function applyEditsLocally(
 async function readOriginal(
   abs: string,
 ): Promise<{ content: string; isNewFile: boolean }> {
-  // The fs guard rejects sensitive paths even on read; mirror that here so
-  // the user sees an empty "before" rather than an error tab.
   const safety = checkReadable(abs);
   if (!safety.ok) return { content: "", isNewFile: false };
   try {
     const r = await native.readFile(abs);
     if (r.kind === "text") return { content: r.content, isNewFile: false };
-    // Binary or oversized — we can't render the original sensibly. Show the
-    // proposed content as a "new" view; the user can still cancel.
     return { content: "", isNewFile: false };
   } catch (e) {
     const msg = String(e).toLowerCase();

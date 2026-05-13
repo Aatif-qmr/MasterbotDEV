@@ -5,18 +5,18 @@ Thanks for wanting to help. Issues, PRs, and ideas are all welcome.
 ## Quick start
 
 ```bash
-pnpm install
-pnpm tauri dev
+bun install
+bun tauri dev
 ```
 
-Prereqs: Rust (stable), Node 20+, pnpm, plus your platform's [Tauri prerequisites](https://tauri.app/start/prerequisites/).
+Prereqs: Rust (stable), [Bun](https://bun.sh), plus your platform's [Tauri prerequisites](https://tauri.app/start/prerequisites/).
 
 ## Before opening a PR
 
 Run these and make sure they pass:
 
 ```bash
-pnpm exec tsc --noEmit          # frontend types
+bun x tsc --noEmit              # frontend types
 cd src-tauri && cargo clippy    # Rust lint
 cd src-tauri && cargo fmt       # Rust format
 ```
@@ -24,7 +24,7 @@ cd src-tauri && cargo fmt       # Rust format
 Build a release bundle at least once if you touched anything in `src-tauri/`:
 
 ```bash
-pnpm tauri build
+bun tauri build
 ```
 
 ## Branches

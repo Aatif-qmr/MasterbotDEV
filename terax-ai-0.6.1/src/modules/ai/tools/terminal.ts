@@ -1,4 +1,4 @@
-import { tool } from "ai";
+import { tool } from "../engine/types";
 import { z } from "zod";
 import { checkShellCommand } from "../lib/security";
 import type { ToolContext } from "./context";

@@ -1,0 +1,11 @@
+# Bun configuration for Terax AI
+
+telemetry = false
+
+[install]
+# Ensure peer dependencies are handled strictly for 2026 standard
+# optional: peer = true
+
+[test]
+# Configure Bun's native test runner
+root = "./src"

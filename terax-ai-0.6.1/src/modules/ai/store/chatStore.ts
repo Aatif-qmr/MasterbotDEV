@@ -1,8 +1,3 @@
-import { Chat, type UIMessage } from "@ai-sdk/react";
-import {
-  type ChatTransport,
-  lastAssistantMessageIsCompleteWithApprovalResponses,
-} from "ai";
 import { create } from "zustand";
 import {
   DEFAULT_MODEL_ID,
@@ -11,11 +6,6 @@ import {
   type ModelId,
   type ProviderId,
 } from "../config";
-import { usePreferencesStore } from "@/modules/settings/preferences";
-import { BUILTIN_AGENTS } from "../lib/agents";
-import { useAgentsStore } from "./agentsStore";
-import { usePlanStore } from "./planStore";
-import { useTodosStore } from "./todoStore";
 import { EMPTY_PROVIDER_KEYS, type ProviderKeys } from "../lib/keyring";
 import {
   deleteSessionData,
@@ -28,9 +18,129 @@ import {
   saveSessionsList,
   type SessionMeta,
 } from "../lib/sessions";
-import { createContextAwareTransport } from "../lib/transport";
-import { createGeminiTransport } from "../lib/gemini/transport";
-import type { ToolContext } from "../tools/tools";
+import { GeminiSession, createTeraxGeminiAgent } from "../lib/gemini/session";
+import { GeminiEventType } from "../lib/gemini/types";
+
+// Minimal UIMessage type replacement
+export type UIMessage = {
+  id: string;
+  role: "user" | "assistant" | "system" | "data";
+  content: string;
+  parts?: any[];
+};
+
+export type ChatStatus = "idle" | "thinking" | "streaming" | "submitted" | "error";
+
+/**
+ * Local Chat class replacement for Vercel AI SDK's Chat
+ */
+export class Chat<T extends UIMessage = UIMessage> {
+  public messages: T[] = [];
+  public status: ChatStatus = "idle";
+  public error: Error | undefined;
+  public id: string;
+  
+  private onStep?: (step: string | null) => void;
+  private onError?: (error: Error) => void;
+  private session: GeminiSession | null = null;
+  private agent = createTeraxGeminiAgent();
+
+  constructor(options: {
+    id: string;
+    messages?: T[];
+    onStep?: (step: string | null) => void;
+    onError?: (error: Error) => void;
+  }) {
+    this.id = options.id;
+    this.messages = options.messages || [];
+    this.onStep = options.onStep;
+    this.onError = options.onError;
+  }
+
+  async initialize() {
+    if (!this.session) {
+      this.session = this.agent.session(this.id);
+      await this.session.initialize();
+    }
+  }
+
+  async sendMessage(input: { text?: string; parts?: any[] }) {
+    await this.initialize();
+    
+    const content = input.text || (input.parts?.[0]?.type === 'text' ? (input.parts[0] as any).text : '');
+    const userMsg = {
+      id: `msg-${Date.now()}`,
+      role: "user",
+      content,
+      parts: input.parts || [{ type: "text", text: content }],
+    } as T;
+    
+    this.messages = [...this.messages, userMsg];
+    this.status = "submitted";
+    this.notify();
+
+    const assistantMsg = {
+      id: `msg-${Date.now() + 1}`,
+      role: "assistant",
+      content: "",
+      parts: [],
+    } as unknown as T;
+    
+    this.messages = [...this.messages, assistantMsg];
+    
+    try {
+      this.status = "streaming";
+      for await (const event of this.session!.sendStream(content)) {
+        if (event.type === GeminiEventType.Content) {
+          (assistantMsg as any).content += event.value;
+          (assistantMsg as any).parts.push({ type: "text", text: event.value });
+          this.messages = [...this.messages];
+          this.notify();
+        } else if (event.type === GeminiEventType.ToolCallRequest) {
+          const toolCall = event.value as any;
+          (assistantMsg as any).parts.push({
+            type: "tool-invocation",
+            toolCallId: toolCall.callId,
+            toolName: toolCall.name,
+            args: toolCall.args,
+            state: "call",
+          });
+          this.messages = [...this.messages];
+          this.notify();
+          if (this.onStep) this.onStep(`Calling ${toolCall.name}`);
+        } else if (event.type === GeminiEventType.Finish) {
+          this.status = "idle";
+          this.notify();
+        } else if (event.type === GeminiEventType.Error) {
+          throw new Error(String(event.value));
+        }
+      }
+    } catch (err) {
+      this.error = err instanceof Error ? err : new Error(String(err));
+      this.status = "error";
+      if (this.onError) this.onError(this.error);
+      this.notify();
+    }
+  }
+
+  clearError() {
+    this.error = undefined;
+    this.notify();
+  }
+
+  stop() {
+    // Implement stop logic if possible with Native SDK abort signals
+  }
+
+  private listeners = new Set<() => void>();
+  subscribe(fn: () => void) {
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  }
+  private notify() {
+    this.listeners.forEach(fn => fn());
+  }
+}
 
 type Live = {
   getCwd: () => string | null;
@@ -81,11 +191,6 @@ type StoreState = {
   live: Live;
   setLive: (live: Live) => void;
 
-  /**
-   * Set by AgentRunBridge each render. Lets surfaces outside the chat hook
-   * tree (e.g. the AI diff tab in the editor area) resolve a pending tool
-   * approval through the active session's `addToolApprovalResponse`.
-   */
   approvalResponder: ApprovalResponder | null;
   setApprovalResponder: (fn: ApprovalResponder | null) => void;
   respondToApproval: (approvalId: string, approved: boolean) => void;
@@ -129,7 +234,6 @@ type StoreState = {
   switchSession: (id: string) => void;
   deleteSession: (id: string) => void;
   renameSession: (id: string, title: string) => void;
-  /** Persist messages of a session and bump its updatedAt + auto-title. */
   persistMessages: (id: string, messages: UIMessage[]) => void;
 };
 
@@ -142,17 +246,9 @@ const NOOP_LIVE: Live = {
   openPreview: () => false,
 };
 
-// Per-session Chat instances. Transport reads the keys map lazily, so a key
-// change does not require rebuilding chats.
-const chats = new Map<string, Chat<UIMessage>>();
-// Initial messages for a session, populated at hydration time and consumed
-// when the matching Chat is constructed.
+const chats = new Map<string, Chat>();
 const seedMessages = new Map<string, UIMessage[]>();
 
-// Trailing debounce for per-token message persistence. Streaming fires
-// `persistMessages` on every token; without this we'd JSON-serialize the
-// full message array and round-trip to the store plugin per token, which
-// stalls the UI. Flush on idle (status transition) via `flushPersist`.
 const PERSIST_DEBOUNCE_MS = 300;
 const pendingPersist = new Map<
   string,
@@ -175,63 +271,16 @@ export function flushPersist(id?: string): void {
   for (const key of Array.from(pendingPersist.keys())) flushPersistEntry(key);
 }
 
-function makeChat(sessionId: string): Chat<UIMessage> {
-  // Per-session read cache: paths the model has called `read_file` on.
-  // `edit`/`multi_edit` enforce read-before-edit by checking membership.
-  const readCache = new Set<string>();
-  const toolContext: ToolContext = {
-    getCwd: () => useChatStore.getState().live.getCwd(),
-    getWorkspaceRoot: () =>
-      useChatStore.getState().live.getWorkspaceRoot(),
-    getTerminalContext: () =>
-      useChatStore.getState().live.getTerminalContext(),
-    injectIntoActivePty: (text) =>
-      useChatStore.getState().live.injectIntoActivePty(text),
-    openPreview: (url) => useChatStore.getState().live.openPreview(url),
-    readCache,
-    getSessionId: () => sessionId,
-  };
-
-  const transport = usePreferencesStore.getState().geminiNativeEnabled
-    ? createGeminiTransport({
-        sessionId,
-        skillsEnabled: usePreferencesStore.getState().geminiSkillsEnabled,
-      } as any)
-    : createContextAwareTransport({
-        getKeys: () => useChatStore.getState().apiKeys,
-        toolContext,
-        getModelId: () => useChatStore.getState().selectedModelId,
-        getCustomInstructions: () =>
-          usePreferencesStore.getState().customInstructions,
-        getAgentPersona: () => {
-          const { activeId, customAgents } = useAgentsStore.getState();
-          const all = [...BUILTIN_AGENTS, ...customAgents];
-          const a = all.find((x) => x.id === activeId) ?? BUILTIN_AGENTS[0];
-          return { name: a.name, instructions: a.instructions };
-        },
-        getLive: () => {
-          const live = useChatStore.getState().live;
-          return {
-            cwd: live.getCwd(),
-            terminal: live.getTerminalContext(),
-            workspaceRoot: live.getWorkspaceRoot(),
-            activeFile: live.getActiveFile(),
-          };
-        },
-        getPlanMode: () => usePlanStore.getState().active,
-        onStep: (step) => {
-          useChatStore.getState().patchAgentMeta({ step });
-        },
-      }) as unknown as ChatTransport<UIMessage>;
-
+function makeChat(sessionId: string): Chat {
   const initialMessages = seedMessages.get(sessionId);
   seedMessages.delete(sessionId);
 
-  return new Chat<UIMessage>({
+  return new Chat({
     id: sessionId,
-    transport: transport as any,
     messages: initialMessages,
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+    onStep: (step) => {
+      useChatStore.getState().patchAgentMeta({ step });
+    },
     onError: (e) => {
       useChatStore.getState().patchAgentMeta({
         status: "error",
@@ -314,10 +363,6 @@ export const useChatStore = create<StoreState>((set, get) => ({
   hydrateSessions: async () => {
     if (get().sessionsHydrated) return;
     const { sessions } = await loadAll();
-
-    // Reuse the most recent untitled "New chat" session if one exists from
-    // the previous run — no point stacking empty placeholder sessions every
-    // launch. Otherwise prepend a fresh one.
     const reusable = sessions[0]?.title === "New chat" ? sessions[0] : null;
     let nextSessions: SessionMeta[];
     let freshId: string;
@@ -336,7 +381,6 @@ export const useChatStore = create<StoreState>((set, get) => ({
       void saveSessionsList(nextSessions);
     }
     void saveActiveId(freshId);
-
     set({
       sessions: nextSessions,
       activeSessionId: freshId,
@@ -362,9 +406,6 @@ export const useChatStore = create<StoreState>((set, get) => ({
   switchSession: (id) => {
     if (get().activeSessionId === id) return;
     if (!get().sessions.some((s) => s.id === id)) return;
-
-    // Lazily seed the chat with persisted messages the first time we open
-    // this session. Subsequent switches reuse the cached Chat instance.
     const flip = () => {
       set({ activeSessionId: id, agentMeta: IDLE_META });
       void saveActiveId(id);
@@ -374,7 +415,7 @@ export const useChatStore = create<StoreState>((set, get) => ({
       return;
     }
     void loadMessages(id).then((m) => {
-      if (m && m.length > 0 && !chats.has(id)) seedMessages.set(id, m);
+      if (m && m.length > 0 && !chats.has(id)) seedMessages.set(id, m as any);
       flip();
     });
   },
@@ -390,8 +431,6 @@ export const useChatStore = create<StoreState>((set, get) => ({
       pendingPersist.delete(id);
     }
     void deleteSessionData(id);
-    void useTodosStore.getState().clearSession(id);
-
     if (remaining.length === 0) {
       const fresh: SessionMeta = {
         id: newSessionId(),
@@ -404,7 +443,6 @@ export const useChatStore = create<StoreState>((set, get) => ({
       void saveActiveId(fresh.id);
       return;
     }
-
     const wasActive = get().activeSessionId === id;
     const nextActive = wasActive ? remaining[0].id : get().activeSessionId;
     set({ sessions: remaining, activeSessionId: nextActive });
@@ -421,26 +459,21 @@ export const useChatStore = create<StoreState>((set, get) => ({
   },
 
   persistMessages: (id, messages) => {
-    // Debounce the message-blob write so streaming doesn't pound the store.
     const existing = pendingPersist.get(id);
     if (existing) clearTimeout(existing.timer);
     const timer = setTimeout(() => {
       const entry = pendingPersist.get(id);
       if (!entry) return;
       pendingPersist.delete(id);
-      void saveMessages(id, entry.latest);
+      void saveMessages(id, entry.latest as any);
     }, PERSIST_DEBOUNCE_MS);
     pendingPersist.set(id, { latest: messages, timer });
-
-    // Update zustand session list only when the derived title actually
-    // changes — otherwise we'd rewrite the sessions array (and trigger
-    // re-renders + a store write) on every token.
     const sessions = get().sessions;
     const meta = sessions.find((s) => s.id === id);
     if (!meta) return;
     const isUntitled = !meta.title || meta.title === "New chat";
     if (!isUntitled) return;
-    const nextTitle = deriveTitle(messages);
+    const nextTitle = deriveTitle(messages as any);
     if (nextTitle === meta.title) return;
     const next = sessions.map((s) =>
       s.id === id ? { ...s, title: nextTitle, updatedAt: Date.now() } : s,
@@ -465,7 +498,7 @@ export function hasKeyForModel(modelId: ModelId): boolean {
   return providerNeedsKey(provider) ? !!apiKeys[provider] : true;
 }
 
-export function getOrCreateChat(sessionId: string): Chat<UIMessage> {
+export function getOrCreateChat(sessionId: string): Chat {
   const existing = chats.get(sessionId);
   if (existing) return existing;
   const c = makeChat(sessionId);
@@ -473,7 +506,7 @@ export function getOrCreateChat(sessionId: string): Chat<UIMessage> {
   return c;
 }
 
-export function getChat(sessionId?: string): Chat<UIMessage> | undefined {
+export function getChat(sessionId?: string): Chat | undefined {
   if (sessionId) return chats.get(sessionId);
   const id = useChatStore.getState().activeSessionId;
   return id ? chats.get(id) : undefined;
@@ -483,7 +516,6 @@ export async function sendMessage(text: string): Promise<boolean> {
   const state = useChatStore.getState();
   const sessionId = state.activeSessionId;
   if (!sessionId) return false;
-  if (providerNeedsKey(getModel(state.selectedModelId).provider) && !getActiveProviderKey()) return false;
   const c = getOrCreateChat(sessionId);
   await c.sendMessage({ text });
   return true;

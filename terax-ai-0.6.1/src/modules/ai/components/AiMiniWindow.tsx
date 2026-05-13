@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { useChat, type UIMessage } from "@ai-sdk/react";
+import { useChat } from "../hooks/useChat";
 import {
   Add01Icon,
   AlertCircleIcon,
@@ -32,7 +32,7 @@ import { useEffect, useMemo } from "react";
 import { getModel, getModelContextLimit } from "../config";
 import type { SessionMeta } from "../lib/sessions";
 import { useAgentsStore } from "../store/agentsStore";
-import { getOrCreateChat, useChatStore } from "../store/chatStore";
+import { getOrCreateChat, useChatStore, type UIMessage } from "../store/chatStore";
 import { usePlanStore } from "../store/planStore";
 import { AgentSwitcher } from "./AgentSwitcher";
 import { AiChatView } from "./AiChat";
@@ -260,7 +260,7 @@ function Header({
 function estimateTokens(messages: UIMessage[]): number {
   let chars = 0;
   for (const m of messages) {
-    for (const p of m.parts) {
+    for (const p of (m.parts || [])) {
       if (p.type === "text") {
         chars += (p as { text?: string }).text?.length ?? 0;
       } else if (p.type === "reasoning") {

@@ -1,4 +1,4 @@
-import { tool } from "ai";
+import { tool } from "../engine/types";
 import { z } from "zod";
 import { runSubagent } from "../agents/runSubagent";
 import { SUBAGENTS, type SubagentType } from "../agents/registry";

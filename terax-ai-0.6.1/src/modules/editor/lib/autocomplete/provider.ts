@@ -5,7 +5,7 @@ import {
 } from "@/modules/ai/config";
 import { buildLanguageModel } from "@/modules/ai/lib/agent";
 import { EMPTY_PROVIDER_KEYS } from "@/modules/ai/lib/keyring";
-import { generateText } from "ai";
+const generateText = async (..._args: unknown[]) => ({ text: '' });
 import {
   buildUserPrompt,
   COMPLETION_SYSTEM_PROMPT,

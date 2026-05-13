@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { UIMessage } from "ai";
+import type { UIMessage } from "@/modules/ai/store/chatStore";
 import { ArrowDown01Icon, Download01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { ComponentProps } from "react";
@@ -102,8 +102,8 @@ export const ConversationScrollButton = ({
 };
 
 const getMessageText = (message: UIMessage): string =>
-  message.parts
-    .filter((part) => part.type === "text")
+  (message.parts || [])
+    .filter((part): part is Extract<typeof part, { type: "text" }> => part.type === "text")
     .map((part) => part.text)
     .join("");
 

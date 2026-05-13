@@ -1,4 +1,4 @@
-import { tool } from "ai";
+import { tool } from "../engine/types";
 import { z } from "zod";
 import { newTodoId, validateTodos, type Todo } from "../lib/todos";
 import { useTodosStore } from "../store/todoStore";

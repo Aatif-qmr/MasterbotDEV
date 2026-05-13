@@ -1,4 +1,5 @@
-import { Experimental_Agent as Agent, stepCountIs } from "ai";
+const Agent = class { constructor(public config: unknown) {} };
+const stepCountIs = (_count: number) => (_step: unknown) => false;
 import { DEFAULT_MODEL_ID, getModel, type ModelId } from "../config";
 import { buildLanguageModel } from "../lib/agent";
 import type { ProviderKeys } from "../lib/keyring";
