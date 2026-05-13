@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum NodeType {
     File,
     Function,
@@ -20,10 +21,13 @@ pub enum EdgeType {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GraphNode {
     pub id: String,
     pub label: String,
+    #[serde(rename = "filePath")]
     pub file_path: String,
+    #[serde(rename = "type")]
     pub node_type: NodeType,
     pub x: f64,
     pub y: f64,
@@ -31,14 +35,17 @@ pub struct GraphNode {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GraphEdge {
     pub source: String,
     pub target: String,
+    #[serde(rename = "type")]
     pub edge_type: EdgeType,
     pub weight: f32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GraphMetadata {
     pub total_nodes: usize,
     pub total_edges: usize,
@@ -47,6 +54,7 @@ pub struct GraphMetadata {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GraphData {
     pub nodes: Vec<GraphNode>,
     pub edges: Vec<GraphEdge>,

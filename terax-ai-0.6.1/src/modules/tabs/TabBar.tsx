@@ -14,6 +14,7 @@ import {
   ComputerTerminal02Icon,
   GitCompareIcon,
   Globe02Icon,
+  HierarchyIcon,
   PencilEdit02Icon,
   PlusSignIcon,
 } from "@hugeicons/core-free-icons";
@@ -196,6 +197,16 @@ function TabIcon({ tab }: { tab: Tab }) {
       />
     );
   }
+  if (tab.kind === "graph") {
+    return (
+      <HugeiconsIcon
+        icon={HierarchyIcon}
+        size={14}
+        strokeWidth={2}
+        className="shrink-0 text-blue-500"
+      />
+    );
+  }
   if (tab.kind === "ai-diff") {
     return (
       <HugeiconsIcon
@@ -220,6 +231,7 @@ function labelFor(t: Tab): string {
   if (t.kind === "editor") return t.title;
   if (t.kind === "preview") return t.title;
   if (t.kind === "ai-diff") return t.title;
+  if (t.kind === "graph") return t.title;
   if (!t.cwd) return t.title;
   const parts = t.cwd.split(/[\\/]/).filter(Boolean);
   return parts.length ? parts[parts.length - 1] : "/";

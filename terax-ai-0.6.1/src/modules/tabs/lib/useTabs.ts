@@ -60,7 +60,14 @@ export type AiDiffTab = {
   isNewFile: boolean;
 };
 
-export type Tab = TerminalTab | EditorTab | PreviewTab | AiDiffTab;
+export type GraphTab = {
+  id: number;
+  kind: "graph";
+  title: string;
+  projectRoot: string;
+};
+
+export type Tab = TerminalTab | EditorTab | PreviewTab | AiDiffTab | GraphTab;
 
 export type TabPatch = Partial<{
   title: string;
@@ -267,6 +274,32 @@ export function useTabs(initial?: Partial<TerminalTab>) {
     [],
   );
 
+  const openGraphTab = useCallback((projectRoot: string) => {
+    let targetId: number | null = null;
+    setTabs((curr) => {
+      const existing = curr.find(
+        (t) => t.kind === "graph" && t.projectRoot === projectRoot,
+      );
+      if (existing) {
+        targetId = existing.id;
+        return curr;
+      }
+      const id = nextIdRef.current++;
+      targetId = id;
+      return [
+        ...curr,
+        {
+          id,
+          kind: "graph",
+          title: "Dependency Graph",
+          projectRoot,
+        } satisfies GraphTab,
+      ];
+    });
+    if (targetId !== null) setActiveId(targetId);
+    return targetId as number | null;
+  }, []);
+
   const newPreviewTab = useCallback((url: string) => {
     const id = nextIdRef.current++;
     setTabs((t) => [
@@ -465,6 +498,7 @@ export function useTabs(initial?: Partial<TerminalTab>) {
     setActiveId,
     newTab,
     openFileTab,
+    openGraphTab,
     pinTab,
     newPreviewTab,
     openAiDiffTab,

@@ -25,6 +25,7 @@ import {
   type EditorPaneHandle,
 } from "@/modules/editor";
 import { FileExplorer } from "@/modules/explorer";
+import { GraphView } from "@/modules/graphify";
 import {
   Header,
   type SearchInlineHandle,
@@ -75,6 +76,7 @@ export default function App() {
     setActiveId,
     newTab,
     openFileTab,
+    openGraphTab,
     pinTab,
     newPreviewTab,
     openAiDiffTab,
@@ -187,6 +189,7 @@ export default function App() {
   const isEditorTab = activeTab?.kind === "editor";
   const isPreviewTab = activeTab?.kind === "preview";
   const isAiDiffTab = activeTab?.kind === "ai-diff";
+  const isGraphTab = activeTab?.kind === "graph";
 
   // When an AI diff is approved (write_file applied to disk), reload any
   // open editor tabs for that path so the user sees the new content. We
@@ -698,6 +701,7 @@ export default function App() {
             onNew={openNewTab}
             onNewPreview={() => openPreviewTab("")}
             onNewEditor={() => setNewEditorOpen(true)}
+            onOpenGraph={() => explorerRoot && openGraphTab(explorerRoot)}
             onClose={handleClose}
             onPin={pinTab}
             onToggleSidebar={toggleSidebar}
@@ -802,6 +806,20 @@ export default function App() {
                         onAccept={(id) => respondToApproval(id, true)}
                         onReject={(id) => respondToApproval(id, false)}
                       />
+                    </div>
+                    <div
+                      className={cn(
+                        "absolute inset-0",
+                        !isGraphTab && "invisible pointer-events-none",
+                      )}
+                      aria-hidden={!isGraphTab}
+                    >
+                      {activeTab?.kind === "graph" && (
+                        <GraphView 
+                          projectRoot={activeTab.projectRoot} 
+                          onOpenFile={handleOpenFile}
+                        />
+                      )}
                     </div>
                   </div>
 

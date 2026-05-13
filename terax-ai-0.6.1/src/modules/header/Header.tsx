@@ -20,6 +20,7 @@ import {
   KeyboardIcon,
   LayoutTwoColumnIcon,
   LayoutTwoRowIcon,
+  HierarchyIcon,
   Settings01Icon,
   SidebarLeftIcon,
 } from "@hugeicons/core-free-icons";
@@ -38,6 +39,7 @@ type Props = {
   onNew: () => void;
   onNewPreview: () => void;
   onNewEditor: () => void;
+  onOpenGraph: () => void;
   onClose: (id: number) => void;
   /** Promote a preview (transient) tab to persistent. */
   onPin: (id: number) => void;
@@ -60,6 +62,7 @@ export function Header({
   onNew,
   onNewPreview,
   onNewEditor,
+  onOpenGraph,
   onClose,
   onPin,
   onToggleSidebar,
@@ -111,6 +114,18 @@ export function Header({
       title={shortcutLabel}
     >
       <HugeiconsIcon icon={KeyboardIcon} size={16} strokeWidth={1.75} />
+    </Button>
+  );
+
+  const graphButton = (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="size-7 shrink-0 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+      onClick={onOpenGraph}
+      title="Project Graph"
+    >
+      <HugeiconsIcon icon={HierarchyIcon} size={16} strokeWidth={1.75} />
     </Button>
   );
 
@@ -216,12 +231,18 @@ export function Header({
 
       {IS_MAC && (
         <>
+          {graphButton}
           {shortcutsButton}
           {settingsButton}
         </>
       )}
 
-      {!IS_MAC && settingsButton}
+      {!IS_MAC && (
+        <>
+          {graphButton}
+          {settingsButton}
+        </>
+      )}
 
       {USE_CUSTOM_WINDOW_CONTROLS && (
         <>
