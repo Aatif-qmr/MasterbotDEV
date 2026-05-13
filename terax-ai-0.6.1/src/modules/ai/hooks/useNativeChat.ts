@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
-import { GeminiSession, createTeraxGeminiAgent } from '../lib/gemini/session';
-import { GeminiEventType } from '../lib/gemini/types';
+import { GeminiSession, createTeraxGeminiAgent } from '../engine/session';
+import { GeminiEventType } from '../engine/gemini_types';
 
 export type Message = {
   id: string;

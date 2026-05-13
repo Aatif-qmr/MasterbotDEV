@@ -1,6 +1,8 @@
 import type { Content } from '@google/genai';
 import { z, type ZodTypeAny } from "zod";
 
+export type { Content };
+
 /**
  * Strict typing for the Gemini stream chunks coming from the SDK
  * This mirrors what we expect to extract from GenerateContentResponse

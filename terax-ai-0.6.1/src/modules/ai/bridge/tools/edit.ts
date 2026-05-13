@@ -1,8 +1,8 @@
-import { tool } from "../engine/types";
+import { tool } from "../../engine/types";
 import { z } from "zod";
-import { native } from "../lib/native";
-import { checkWritable } from "../lib/security";
-import { newQueuedEditId, usePlanStore } from "../store/planStore";
+import { native } from "../../lib/native";
+import { checkWritable } from "../../lib/security";
+import { newQueuedEditId, usePlanStore } from "../../store/planStore";
 import { resolvePath, type ToolContext } from "./context";
 
 type EditResult =

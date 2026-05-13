@@ -20,7 +20,14 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/modules/*": ["./src/modules/*"],
+      "@/modules/ai/*": ["./src/modules/ai/*"],
+      "@/modules/ai/engine/*": ["./src/modules/ai/engine/*"],
+      "@/modules/ai/bridge/*": ["./src/modules/ai/bridge/*"],
+      "@/modules/ai/storage/*": ["./src/modules/ai/storage/*"],
+      "@/modules/ai/store/*": ["./src/modules/ai/store/*"],
+      "@/modules/ai/agents/*": ["./src/modules/ai/agents/*"]
     }
   },
   "include": ["src"],

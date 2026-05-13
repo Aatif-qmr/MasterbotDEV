@@ -1,8 +1,8 @@
-import { tool } from "../engine/types";
+import { tool } from "../../engine/types";
 import { z } from "zod";
-import { runSubagent } from "../agents/runSubagent";
-import { SUBAGENTS, type SubagentType } from "../agents/registry";
-import { useChatStore } from "../store/chatStore";
+import { runSubagent } from "../../agents/runSubagent";
+import { SUBAGENTS, type SubagentType } from "../../agents/registry";
+import { useChatStore } from "../../store/chatStore";
 import type { ToolContext } from "./context";
 
 const TYPE_KEYS = Object.keys(SUBAGENTS) as [SubagentType, ...SubagentType[]];

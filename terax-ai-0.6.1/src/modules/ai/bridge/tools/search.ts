@@ -1,7 +1,7 @@
-import { tool } from "../engine/types";
+import { tool } from "../../engine/types";
 import { z } from "zod";
-import { native } from "../lib/native";
-import { checkReadable } from "../lib/security";
+import { native } from "../../lib/native";
+import { checkReadable } from "../../lib/security";
 import { resolvePath, type ToolContext } from "./context";
 
 function resolveRoot(

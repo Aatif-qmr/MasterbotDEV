@@ -1,7 +1,7 @@
-import { tool } from "../engine/types";
+import { tool } from "../../engine/types";
 import { z } from "zod";
-import { newTodoId, validateTodos, type Todo } from "../lib/todos";
-import { useTodosStore } from "../store/todoStore";
+import { newTodoId, validateTodos, type Todo } from "../../lib/todos";
+import { useTodosStore } from "../../store/todoStore";
 import type { ToolContext } from "./context";
 
 const TodoStatus = z.enum(["pending", "in_progress", "completed"]);

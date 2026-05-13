@@ -18,8 +18,9 @@ import {
   saveSessionsList,
   type SessionMeta,
 } from "../lib/sessions";
-import { GeminiSession, createTeraxGeminiAgent } from "../lib/gemini/session";
-import { GeminiEventType } from "../lib/gemini/types";
+import { chatRepository } from "../storage/repository";
+import { GeminiSession, createTeraxGeminiAgent } from "../engine/session";
+import { GeminiEventType } from "../engine/gemini_types";
 import type { UIMessage, UIMessagePart, ChatStatus, TeraxToolCall } from "../engine/types";
 
 export type { UIMessage, UIMessagePart, ChatStatus, TeraxToolCall };
@@ -433,6 +434,7 @@ export const useChatStore = create<StoreState>((set, get) => ({
       pendingPersist.delete(id);
     }
     void deleteSessionData(id);
+    void chatRepository.clearProject(id);
     if (remaining.length === 0) {
       const fresh: SessionMeta = {
         id: newSessionId(),

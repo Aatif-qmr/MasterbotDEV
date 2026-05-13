@@ -6,8 +6,8 @@
  */
 
 import type { SessionContext, AgentFilesystem, AgentShell } from './types';
-import { native } from '../native';
-import type { CommandOutput } from '../native';
+import { native } from '../lib/native';
+import type { CommandOutput } from '../lib/native';
 
 /**
  * Gemini-native filesystem implementation that bridges to Terax's native Tauri commands

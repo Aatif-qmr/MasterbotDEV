@@ -13,13 +13,13 @@ import type {
   Tool,
   SkillReference,
   SystemInstructions,
-} from './types';
-import { GeminiEventType } from './types';
-import type { GeminiStreamChunk } from '../../engine/types';
+} from './gemini_types';
+import { GeminiEventType } from './gemini_types';
+import type { GeminiStreamChunk } from './types';
 import { GEMINI_SYSTEM_PROMPT } from './native';
-import { useChatStore } from '../../store/chatStore';
-import { native } from '../native';
-import { buildTools, type ChatTools } from '../../tools/tools';
+import { useChatStore } from '../store/chatStore';
+import { native } from '../lib/native';
+import { buildTools, type ChatTools } from '../bridge/tools/tools';
 
 interface Skill {
   name: string;
@@ -171,7 +171,7 @@ export class GeminiSession {
     const state = useChatStore.getState();
     return {
       sessionId: this.id,
-      transcript: [...this.history] as unknown as readonly import('./types').Content[],
+      transcript: [...this.history] as unknown as readonly import('./gemini_types').Content[],
       cwd: state.live.getCwd() ?? '/',
       timestamp: new Date().toISOString(),
       fs: {

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import type { AiDiffStatus } from "@/modules/tabs";
 import { native } from "../lib/native";
 import { checkReadable } from "../lib/security";
-import { resolvePath } from "../tools/tools";
+import { resolvePath } from "../bridge/tools/tools";
 import {
   flushPersist,
   getOrCreateChat,

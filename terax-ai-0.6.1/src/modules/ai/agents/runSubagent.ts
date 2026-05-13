@@ -3,9 +3,9 @@ const stepCountIs = (_count: number) => (_step: unknown) => false;
 import { DEFAULT_MODEL_ID, getModel, type ModelId } from "../config";
 import { buildLanguageModel } from "../lib/agent";
 import type { ProviderKeys } from "../lib/keyring";
-import type { ToolContext } from "../tools/context";
-import { buildFsTools } from "../tools/fs";
-import { buildSearchTools } from "../tools/search";
+import type { ToolContext } from "../bridge/tools/context";
+import { buildFsTools } from "../bridge/tools/fs";
+import { buildSearchTools } from "../bridge/tools/search";
 import { SUBAGENTS, type SubagentType } from "./registry";
 
 const SUBAGENT_MAX_STEPS = 12;
