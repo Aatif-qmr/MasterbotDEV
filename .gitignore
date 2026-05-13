@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build artifacts
+dist/
+build/
+bundle/
+target/
+**/dist/
+**/build/
+**/target/
+
+# OS Metadata
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific
+.env
+.env.local
+.integration-tests/
+.perf-tests/
+junit.xml
+
+# Ignore tests for the "clean" push if desired, 
+# but usually it's better to keep source tests on GitHub.
+# I will NOT ignore source tests in .gitignore, but I will delete them locally later for graphify.
