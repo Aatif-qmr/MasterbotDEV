@@ -51,7 +51,7 @@ import {
   type TeraxOpenInput,
 } from "@/modules/terminal";
 import { ThemeProvider } from "@/modules/theme";
-import { UpdaterDialog } from "@/modules/updater";
+// Auto-update disabled - UpdaterDialog removed
 import { homeDir } from "@tauri-apps/api/path";
 import type { SearchAddon } from "@xterm/addon-search";
 import { AnimatePresence, motion } from "motion/react";
@@ -876,7 +876,7 @@ export default function App() {
             onCreated={(path) => openFileTab(path)}
           />
 
-          <UpdaterDialog />
+          {/* Auto-update disabled - UpdaterDialog removed */}
         </div>
       </TooltipProvider>
     </ThemeProvider>
