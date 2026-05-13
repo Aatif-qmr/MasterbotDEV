@@ -1,23 +1,29 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useGraphStore } from '../store/graphStore';
-import { type GraphNode, type NodeType } from '../types';
 
-const COLORS: Record<NodeType, string> = {
+const NODE_COLORS: Record<string, string> = {
+  // Dependency types
   file: '#3B82F6',
   function: '#10B981',
   class: '#8B5CF6',
   interface: '#F59E0B',
   export: '#EF4444',
+  // Workflow statuses
+  completed: '#10B981',
+  running: '#3B82F6',
+  idle: '#9CA3AF',
+  failed: '#EF4444',
 };
 
 interface GraphCanvasProps {
-  onNodeClick?: (node: GraphNode) => void;
+  onNodeClick?: (node: any) => void;
 }
 
 export const GraphCanvas: React.FC<GraphCanvasProps> = ({ onNodeClick }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { 
     data, 
+    mode,
     viewport, 
     interaction, 
     setZoom, 
@@ -68,7 +74,14 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({ onNodeClick }) => {
         const isHovered = node.id === interaction.hoveredNodeId;
         const isSelected = node.id === interaction.selectedNodeId;
         
-        ctx.fillStyle = COLORS[node.type] || '#9CA3AF';
+        let nodeColor = '#9CA3AF';
+        if (mode === 'workflow') {
+          nodeColor = NODE_COLORS[(node as any).status] || NODE_COLORS.idle;
+        } else {
+          nodeColor = NODE_COLORS[node.type] || '#9CA3AF';
+        }
+        
+        ctx.fillStyle = nodeColor;
         ctx.beginPath();
         const size = node.size || 5;
         ctx.arc(node.x, node.y, size * (isHovered ? 1.5 : 1), 0, Math.PI * 2);

@@ -7,6 +7,7 @@ import { useChatStore } from "@/modules/ai";
 import { Globe02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CwdBreadcrumb } from "./CwdBreadcrumb";
+import { EfficiencyIndicator } from "./components/EfficiencyIndicator";
 
 type Props = {
   cwd: string | null;
@@ -40,6 +41,7 @@ export function StatusBar({
         <CwdBreadcrumb cwd={cwd} filePath={filePath} home={home} onCd={onCd} />
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
+        <EfficiencyIndicator path={filePath ?? null} />
         {detectedPreviewUrl && onOpenPreview ? (
           <button
             type="button"

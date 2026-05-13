@@ -107,7 +107,7 @@ pub fn run() {
         )
         .plugin(tauri_plugin_opener::init())
         .manage(pty::PtyState::default())
-        use modules::{fs, net, pty, secrets, shell, graphify};
+        use modules::{fs, net, pty, secrets, shell, graphify, optimizer};
         // ...
                 .invoke_handler(tauri::generate_handler![
                     pty::pty_open,
@@ -141,6 +141,7 @@ pub fn run() {
                     secrets::secrets_get_all,
                     net::http_ping,
                     graphify::commands::generate_project_graph,
+                    optimizer::analyze_file_complexity,
                 ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

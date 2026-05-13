@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { GraphCanvas } from './GraphCanvas';
 import { useGraphStore } from '../store/graphStore';
+import { cn } from '@/lib/utils';
 
 interface GraphViewProps {
   projectRoot: string;
@@ -8,7 +9,7 @@ interface GraphViewProps {
 }
 
 export const GraphView: React.FC<GraphViewProps> = ({ projectRoot, onOpenFile }) => {
-  const { loadGraph, isLoading, error, data } = useGraphStore();
+  const { loadGraph, isLoading, error, data, mode, setMode } = useGraphStore();
 
   useEffect(() => {
     if (projectRoot) {
@@ -49,24 +50,66 @@ export const GraphView: React.FC<GraphViewProps> = ({ projectRoot, onOpenFile })
       <GraphCanvas onNodeClick={(node) => onOpenFile(node.filePath)} />
       
       {/* Overlay UI */}
-      <div className="absolute top-4 left-4 p-3 bg-slate-900/80 backdrop-blur border border-slate-700 rounded-lg shadow-xl pointer-events-none">
-        <h2 className="text-sm font-semibold text-slate-200 mb-2">Project Dependency Graph</h2>
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <div className="w-2 h-2 rounded-full bg-[#3B82F6]"></div>
-            <span>Files</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
-            <span>Functions</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <div className="w-2 h-2 rounded-full bg-[#8B5CF6]"></div>
-            <span>Classes</span>
+      <div className="absolute top-4 left-4 p-3 bg-slate-900/80 backdrop-blur border border-slate-700 rounded-lg shadow-xl">
+        <div className="flex items-center justify-between mb-4 gap-4 pointer-events-auto">
+          <h2 className="text-sm font-semibold text-slate-200">Graph Explorer</h2>
+          <div className="flex bg-slate-800 rounded p-0.5">
+            <button 
+              onClick={() => setMode('dependencies')}
+              className={cn(
+                "px-2 py-1 text-[10px] rounded transition-colors",
+                mode === 'dependencies' ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200"
+              )}
+            >
+              Dependencies
+            </button>
+            <button 
+              onClick={() => setMode('workflow')}
+              className={cn(
+                "px-2 py-1 text-[10px] rounded transition-colors",
+                mode === 'workflow' ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200"
+              )}
+            >
+              Workflows
+            </button>
           </div>
         </div>
-        {data && (
-          <div className="mt-3 pt-3 border-t border-slate-700 text-[10px] text-slate-500">
+
+        <div className="space-y-1 pointer-events-none">
+          {mode === 'dependencies' ? (
+            <>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="w-2 h-2 rounded-full bg-[#3B82F6]"></div>
+                <span>Files</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                <span>Functions</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="w-2 h-2 rounded-full bg-[#8B5CF6]"></div>
+                <span>Classes</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
+                <span>Completed</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="w-2 h-2 rounded-full bg-[#3B82F6]"></div>
+                <span>Running</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="w-2 h-2 rounded-full bg-slate-500"></div>
+                <span>Idle</span>
+              </div>
+            </>
+          )}
+        </div>
+        {data && mode === 'dependencies' && (
+          <div className="mt-3 pt-3 border-t border-slate-700 text-[10px] text-slate-500 pointer-events-none">
             {data.metadata.totalNodes} nodes • {data.metadata.totalEdges} edges
           </div>
         )}

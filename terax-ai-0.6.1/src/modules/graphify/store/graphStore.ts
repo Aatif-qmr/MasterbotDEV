@@ -2,8 +2,11 @@ import { create } from 'zustand';
 import { type GraphData, type ViewportState, type InteractionState } from '../types';
 import { generateGraph } from '../lib/api';
 
+export type GraphMode = 'dependencies' | 'workflow';
+
 interface GraphStore {
   data: GraphData | null;
+  mode: GraphMode;
   viewport: ViewportState;
   interaction: InteractionState;
   isLoading: boolean;
@@ -14,10 +17,12 @@ interface GraphStore {
   panBy: (dx: number, dy: number) => void;
   selectNode: (nodeId: string | null) => void;
   hoverNode: (nodeId: string | null) => void;
+  setMode: (mode: GraphMode) => void;
 }
 
 export const useGraphStore = create<GraphStore>((set) => ({
   data: null,
+  mode: 'dependencies',
   viewport: { zoom: 1, pan: { x: 0, y: 0 } },
   interaction: { selectedNodeId: null, hoveredNodeId: null },
   isLoading: false,
@@ -52,4 +57,6 @@ export const useGraphStore = create<GraphStore>((set) => ({
   hoverNode: (nodeId) => set((s) => ({ 
     interaction: { ...s.interaction, hoveredNodeId: nodeId } 
   })),
+
+  setMode: (mode) => set({ mode }),
 }));
