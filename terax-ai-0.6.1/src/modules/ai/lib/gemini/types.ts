@@ -100,7 +100,7 @@ export interface GeminiStreamEvent {
 /**
  * Tool definition for Gemini CLI
  */
-export interface ToolDefinition<T extends ZodType = unknown> {
+export interface ToolDefinition<T extends ZodType = any> {
   name: string;
   description: string;
   inputSchema: T;
@@ -110,15 +110,15 @@ export interface ToolDefinition<T extends ZodType = unknown> {
 /**
  * Tool action function
  */
-export type ToolAction<T = unknown> = (
+export type ToolAction<T = any> = (
   params: T, 
   context?: SessionContext
-) => Promise<unknown>;
+) => Promise<any>;
 
 /**
  * Complete tool interface
  */
-export interface Tool<T extends ZodType = unknown> extends ToolDefinition<T> {
+export interface Tool<T extends ZodType = any> extends ToolDefinition<T> {
   action: ToolAction<T>;
 }
 
@@ -126,7 +126,7 @@ export interface Tool<T extends ZodType = unknown> extends ToolDefinition<T> {
  * Simplified Zod type for schema definitions
  */
 export interface ZodType {
-  _type: unknown;
+  _type: any;
 }
 
 /**
@@ -148,6 +148,7 @@ export interface GeminiAgentOptions {
   instructions: SystemInstructions;
   tools?: Array<Tool>;
   skills?: SkillReference[];
+  skillsEnabled?: boolean;
   model?: string;
   cwd?: string;
   debug?: boolean;

@@ -50,6 +50,8 @@ export type Preferences = {
   lmstudioBaseURL: string;
   vimMode: boolean;
   shortcuts: Record<ShortcutId, KeyBinding[]>;
+  geminiNativeEnabled: boolean;
+  geminiSkillsEnabled: boolean;
 };
 
 const STORE_PATH = "terax-settings.json";
@@ -65,6 +67,8 @@ const KEY_AUTOCOMPLETE_MODEL = "autocompleteModelId";
 const KEY_LMSTUDIO_BASE_URL = "lmstudioBaseURL";
 const KEY_VIM_MODE = "vimMode";
 const KEY_SHORTCUTS = "shortcuts";
+const KEY_GEMINI_NATIVE = "geminiNativeEnabled";
+const KEY_GEMINI_SKILLS = "geminiSkillsEnabled";
 
 export const DEFAULT_PREFERENCES: Preferences = {
   theme: "system",
@@ -79,6 +83,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   lmstudioBaseURL: LMSTUDIO_DEFAULT_BASE_URL,
   vimMode: false,
   shortcuts: {} as Record<ShortcutId, KeyBinding[]>,
+  geminiNativeEnabled: false,
+  geminiSkillsEnabled: true,
 };
 
 const store = new LazyStore(STORE_PATH, { defaults: {}, autoSave: 200 });
@@ -129,6 +135,10 @@ export async function loadPreferences(): Promise<Preferences> {
     shortcuts:
       get<Record<ShortcutId, KeyBinding[]>>(KEY_SHORTCUTS) ??
       DEFAULT_PREFERENCES.shortcuts,
+    geminiNativeEnabled:
+      get<boolean>(KEY_GEMINI_NATIVE) ?? DEFAULT_PREFERENCES.geminiNativeEnabled,
+    geminiSkillsEnabled:
+      get<boolean>(KEY_GEMINI_SKILLS) ?? DEFAULT_PREFERENCES.geminiSkillsEnabled,
   };
 }
 
@@ -178,6 +188,14 @@ export async function setVimMode(value: boolean): Promise<void> {
   await writePref(KEY_VIM_MODE, value);
 }
 
+export async function setGeminiNativeEnabled(value: boolean): Promise<void> {
+  await writePref(KEY_GEMINI_NATIVE, value);
+}
+
+export async function setGeminiSkillsEnabled(value: boolean): Promise<void> {
+  await writePref(KEY_GEMINI_SKILLS, value);
+}
+
 export async function setShortcuts(
   value: Record<ShortcutId, KeyBinding[]> | {}
 ): Promise<void> {
@@ -209,6 +227,8 @@ export async function onPreferencesChange(
     [KEY_LMSTUDIO_BASE_URL]: "lmstudioBaseURL",
     [KEY_VIM_MODE]: "vimMode",
     [KEY_SHORTCUTS]: "shortcuts",
+    [KEY_GEMINI_NATIVE]: "geminiNativeEnabled",
+    [KEY_GEMINI_SKILLS]: "geminiSkillsEnabled",
   };
   // Same-process writes still fire onChange immediately; cross-window writes
   // arrive via the Tauri event emitted by writePref().

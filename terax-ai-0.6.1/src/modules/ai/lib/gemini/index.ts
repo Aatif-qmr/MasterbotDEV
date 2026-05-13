@@ -15,8 +15,6 @@ export type {
   AgentShellResult,
   Content,
   SessionContext,
-  GeminiAgent,
-  GeminiSession,
   GeminiStreamEvent,
   ToolDefinition,
   Tool,
@@ -50,6 +48,13 @@ export {
   createTeraxInstructions,
   createTeraxGeminiAgent,
 } from './session';
+
+// Transport adapter
+export {
+  GeminiTransport,
+  createGeminiTransport,
+  type GeminiTransportOptions,
+} from './transport';
 
 /**
  * Quick start example:

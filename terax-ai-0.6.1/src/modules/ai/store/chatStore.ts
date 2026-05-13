@@ -29,6 +29,7 @@ import {
   type SessionMeta,
 } from "../lib/sessions";
 import { createContextAwareTransport } from "../lib/transport";
+import { createGeminiTransport } from "../lib/gemini/transport";
 import type { ToolContext } from "../tools/tools";
 
 type Live = {
@@ -191,39 +192,44 @@ function makeChat(sessionId: string): Chat<UIMessage> {
     getSessionId: () => sessionId,
   };
 
-  const transport = createContextAwareTransport({
-    getKeys: () => useChatStore.getState().apiKeys,
-    toolContext,
-    getModelId: () => useChatStore.getState().selectedModelId,
-    getCustomInstructions: () =>
-      usePreferencesStore.getState().customInstructions,
-    getAgentPersona: () => {
-      const { activeId, customAgents } = useAgentsStore.getState();
-      const all = [...BUILTIN_AGENTS, ...customAgents];
-      const a = all.find((x) => x.id === activeId) ?? BUILTIN_AGENTS[0];
-      return { name: a.name, instructions: a.instructions };
-    },
-    getLive: () => {
-      const live = useChatStore.getState().live;
-      return {
-        cwd: live.getCwd(),
-        terminal: live.getTerminalContext(),
-        workspaceRoot: live.getWorkspaceRoot(),
-        activeFile: live.getActiveFile(),
-      };
-    },
-    getPlanMode: () => usePlanStore.getState().active,
-    onStep: (step) => {
-      useChatStore.getState().patchAgentMeta({ step });
-    },
-  }) as unknown as ChatTransport<UIMessage>;
+  const transport = usePreferencesStore.getState().geminiNativeEnabled
+    ? createGeminiTransport({
+        sessionId,
+        skillsEnabled: usePreferencesStore.getState().geminiSkillsEnabled,
+      } as any)
+    : createContextAwareTransport({
+        getKeys: () => useChatStore.getState().apiKeys,
+        toolContext,
+        getModelId: () => useChatStore.getState().selectedModelId,
+        getCustomInstructions: () =>
+          usePreferencesStore.getState().customInstructions,
+        getAgentPersona: () => {
+          const { activeId, customAgents } = useAgentsStore.getState();
+          const all = [...BUILTIN_AGENTS, ...customAgents];
+          const a = all.find((x) => x.id === activeId) ?? BUILTIN_AGENTS[0];
+          return { name: a.name, instructions: a.instructions };
+        },
+        getLive: () => {
+          const live = useChatStore.getState().live;
+          return {
+            cwd: live.getCwd(),
+            terminal: live.getTerminalContext(),
+            workspaceRoot: live.getWorkspaceRoot(),
+            activeFile: live.getActiveFile(),
+          };
+        },
+        getPlanMode: () => usePlanStore.getState().active,
+        onStep: (step) => {
+          useChatStore.getState().patchAgentMeta({ step });
+        },
+      }) as unknown as ChatTransport<UIMessage>;
 
   const initialMessages = seedMessages.get(sessionId);
   seedMessages.delete(sessionId);
 
   return new Chat<UIMessage>({
     id: sessionId,
-    transport,
+    transport: transport as any,
     messages: initialMessages,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
     onError: (e) => {

@@ -7,17 +7,13 @@
 
 import type { SessionContext, AgentFilesystem, AgentShell } from './types';
 import { native } from '../native';
-import type { ReadResult, CommandOutput } from '../native';
+import type { CommandOutput } from '../native';
 
 /**
  * Gemini-native filesystem implementation that bridges to Terax's native Tauri commands
  */
 export class GeminiTeraxFilesystem implements AgentFilesystem {
-  private workspaceRoot: string | null = null;
-  
-  constructor(getWorkspaceRoot: () => string | null) {
-    this.workspaceRoot = getWorkspaceRoot();
-  }
+  constructor() {}
 
   async readFile(path: string): Promise<string | null> {
     try {
@@ -144,7 +140,7 @@ export class GeminiTeraxShell implements AgentShell {
     exitCode: number | null;
   }> {
     try {
-      const result = await native.shellBgLogs(handle, sinceOffset ?? null);
+      const result = await native.shellBgLogs(handle, sinceOffset ?? undefined);
       return {
         logs: result.bytes,
         nextOffset: result.next_offset,
@@ -196,9 +192,8 @@ export function createGeminiSessionContext(
   sessionId: string,
   transcript: any[],
   getCwd: () => string | null,
-  getWorkspaceRoot: () => string | null,
 ): SessionContext {
-  const fs = new GeminiTeraxFilesystem(getWorkspaceRoot);
+  const fs = new GeminiTeraxFilesystem();
   const shell = new GeminiTeraxShell(getCwd);
 
   return {
