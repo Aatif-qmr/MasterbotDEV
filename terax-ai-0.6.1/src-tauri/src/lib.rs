@@ -107,40 +107,41 @@ pub fn run() {
         )
         .plugin(tauri_plugin_opener::init())
         .manage(pty::PtyState::default())
-        .manage(shell::ShellState::default())
-        .manage(secrets::SecretsState::default())
-        .invoke_handler(tauri::generate_handler![
-            pty::pty_open,
-            pty::pty_write,
-            pty::pty_resize,
-            pty::pty_close,
-            fs::tree::list_subdirs,
-            fs::tree::fs_read_dir,
-            fs::file::fs_read_file,
-            fs::file::fs_write_file,
-            fs::file::fs_stat,
-            fs::mutate::fs_create_file,
-            fs::mutate::fs_create_dir,
-            fs::mutate::fs_rename,
-            fs::mutate::fs_delete,
-            fs::search::fs_search,
-            fs::grep::fs_grep,
-            fs::grep::fs_glob,
-            shell::shell_run_command,
-            shell::shell_session_open,
-            shell::shell_session_run,
-            shell::shell_session_close,
-            shell::shell_bg_spawn,
-            shell::shell_bg_logs,
-            shell::shell_bg_kill,
-            shell::shell_bg_list,
-            open_settings_window,
-            secrets::secrets_get,
-            secrets::secrets_set,
-            secrets::secrets_delete,
-            secrets::secrets_get_all,
-            net::http_ping,
-        ])
+        use modules::{fs, net, pty, secrets, shell, graphify};
+        // ...
+                .invoke_handler(tauri::generate_handler![
+                    pty::pty_open,
+                    pty::pty_write,
+                    pty::pty_resize,
+                    pty::pty_close,
+                    fs::tree::list_subdirs,
+                    fs::tree::fs_read_dir,
+                    fs::file::fs_read_file,
+                    fs::file::fs_write_file,
+                    fs::file::fs_stat,
+                    fs::mutate::fs_create_file,
+                    fs::mutate::fs_create_dir,
+                    fs::mutate::fs_rename,
+                    fs::mutate::fs_delete,
+                    fs::search::fs_search,
+                    fs::grep::fs_grep,
+                    fs::grep::fs_glob,
+                    shell::shell_run_command,
+                    shell::shell_session_open,
+                    shell::shell_session_run,
+                    shell::shell_session_close,
+                    shell::shell_bg_spawn,
+                    shell::shell_bg_logs,
+                    shell::shell_bg_kill,
+                    shell::shell_bg_list,
+                    open_settings_window,
+                    secrets::secrets_get,
+                    secrets::secrets_set,
+                    secrets::secrets_delete,
+                    secrets::secrets_get_all,
+                    net::http_ping,
+                    graphify::commands::generate_project_graph,
+                ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
