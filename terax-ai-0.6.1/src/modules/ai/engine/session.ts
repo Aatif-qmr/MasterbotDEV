@@ -6,6 +6,7 @@
  */
 
 import { GoogleGenAI, type Content, type Part } from '@google/genai';
+import { auth } from './auth';
 import type {
   GeminiAgentOptions,
   SessionContext,
@@ -41,32 +42,39 @@ export function createSessionId(): string {
  */
 export class GeminiAgent {
   private options: GeminiAgentOptions;
-  private client: GoogleGenAI;
+  private client: GoogleGenAI | null = null;
 
   constructor(options: GeminiAgentOptions) {
     this.options = options;
+  }
+
+  private async getClient(): Promise<GoogleGenAI> {
+    if (this.client) return this.client;
     
-    // Initialize the SDK without an API key to trigger native/ADC auth
-    // The SDK will look for GOOGLE_API_KEY env var or use Application Default Credentials.
-    this.client = new GoogleGenAI({
-      apiKey: process.env.GOOGLE_API_KEY || '', // Default to env or empty for ADC
-    });
+    const token = await auth.getToken();
+    if (!token) {
+      throw new Error('NOT_LOGGED_IN');
+    }
+
+    this.client = new GoogleGenAI(token.access_token as string);
+    return this.client;
   }
 
   /**
    * Create a new session
    */
-  session(sessionId?: string): GeminiSession {
+  async session(sessionId?: string): Promise<GeminiSession> {
     const id = sessionId ?? createSessionId();
-    return new GeminiSession(this.options, id, this, this.client);
+    const client = await this.getClient();
+    return new GeminiSession(this.options, id, this, client);
   }
 
   /**
    * Resume an existing session
    */
   async resumeSession(sessionId: string): Promise<GeminiSession> {
-    // In a real implementation, history would be loaded from SQLite here
-    return new GeminiSession(this.options, sessionId, this, this.client);
+    const client = await this.getClient();
+    return new GeminiSession(this.options, sessionId, this, client);
   }
 }
 

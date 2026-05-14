@@ -1,6 +1,6 @@
 mod modules;
 
-use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core};
+use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, auth};
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_window_state::StateFlags;
 
@@ -48,6 +48,7 @@ pub fn run() {
     apply_wayland_webkit_workaround();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_keychain::init())
         .plugin(tauri_plugin_process::init())
         .plugin(
             tauri_plugin_window_state::Builder::new()
@@ -63,6 +64,10 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
+        .setup(|app| {
+            modules::init(app)?;
+            Ok(())
+        })
         .manage(pty::PtyState::default())
         .manage(core::watcher::WatcherService::new())
         .invoke_handler(tauri::generate_handler![
@@ -100,6 +105,10 @@ pub fn run() {
                     optimizer::analyze_file_complexity,
                     core::watcher::watch_project,
                     core::watcher::unwatch_project,
+                    auth::commands::oauth_start_flow,
+                    auth::commands::oauth_handle_callback,
+                    auth::commands::oauth_get_token,
+                    auth::commands::oauth_clear,
                 ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
