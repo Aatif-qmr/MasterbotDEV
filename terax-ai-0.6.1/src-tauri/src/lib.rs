@@ -1,6 +1,6 @@
 mod modules;
 
-use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, auth};
+use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, auth, storage};
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_window_state::StateFlags;
 
@@ -109,6 +109,11 @@ pub fn run() {
                     auth::commands::oauth_handle_callback,
                     auth::commands::oauth_get_token,
                     auth::commands::oauth_clear,
+                    storage::commands::storage_get_context,
+                    storage::commands::storage_save_message,
+                    storage::commands::storage_get_history,
+                    storage::commands::storage_clear_project,
+                    storage::commands::storage_migrate_from_localstorage,
                 ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

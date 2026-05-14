@@ -8,17 +8,17 @@ import {
 } from "../config";
 import { EMPTY_PROVIDER_KEYS, type ProviderKeys } from "../engine/keyring";
 import {
-  deleteSessionData,
   deriveTitle,
   loadAll,
-  loadMessages,
   newSessionId,
   saveActiveId,
-  saveMessages,
   saveSessionsList,
+  loadLegacyMessages,
+  deleteLegacyMessages,
   type SessionMeta,
 } from "../engine/sessions";
 import { chatRepository } from "../storage/repository";
+import { runStorageMigration } from "../storage/migrator";
 import { GeminiSession, createTeraxGeminiAgent } from "../engine/session";
 import { GeminiEventType } from "../engine/gemini_types";
 import type { UIMessage, UIMessagePart, ChatStatus, TeraxToolCall } from "../engine/types";
@@ -142,6 +142,12 @@ export class Chat {
   }
   private notify() {
     this.listeners.forEach(fn => fn());
+    
+    // Auto-persist on change if project path is available
+    const projectPath = useChatStore.getState().live.getWorkspaceRoot();
+    if (projectPath) {
+       useChatStore.getState().persistMessages(this.id, this.messages);
+    }
   }
 }
 
@@ -263,7 +269,14 @@ function flushPersistEntry(id: string) {
   if (!entry) return;
   clearTimeout(entry.timer);
   pendingPersist.delete(id);
-  void saveMessages(id, entry.latest);
+  
+  const projectPath = useChatStore.getState().live.getWorkspaceRoot();
+  if (projectPath) {
+    // Save each message individually to SQLite for better tracking
+    for (const msg of entry.latest) {
+      void chatRepository.saveMessage(projectPath, msg);
+    }
+  }
 }
 
 export function flushPersist(id?: string): void {
@@ -295,7 +308,16 @@ function makeChat(sessionId: string): Chat {
 
 export const useChatStore = create<StoreState>((set, get) => ({
   live: NOOP_LIVE,
-  setLive: (live) => set({ live }),
+  setLive: (live) => {
+    const oldRoot = get().live.getWorkspaceRoot();
+    const newRoot = live.getWorkspaceRoot();
+    set({ live });
+    
+    // If project root changed, we might want to reload the current session's history from the new project DB
+    if (oldRoot !== newRoot && newRoot && get().activeSessionId) {
+       // Optional: logic to handle project-scoped session switching
+    }
+  },
 
   approvalResponder: null,
   setApprovalResponder: (fn) => set({ approvalResponder: fn }),
@@ -359,16 +381,22 @@ export const useChatStore = create<StoreState>((set, get) => ({
     set((s) => ({ agentMeta: { ...s.agentMeta, ...patch } })),
   resetAgentMeta: () => set({ agentMeta: IDLE_META }),
 
+  // Sessions
   sessionsHydrated: false,
   sessions: [],
   activeSessionId: null,
 
   hydrateSessions: async () => {
     if (get().sessionsHydrated) return;
+    
+    // Run migration from localStorage to SQLite
+    await runStorageMigration();
+
     const { sessions } = await loadAll();
     const reusable = sessions[0]?.title === "New chat" ? sessions[0] : null;
     let nextSessions: SessionMeta[];
     let freshId: string;
+    
     if (reusable) {
       nextSessions = sessions;
       freshId = reusable.id;
@@ -383,7 +411,18 @@ export const useChatStore = create<StoreState>((set, get) => ({
       nextSessions = [fresh, ...sessions];
       void saveSessionsList(nextSessions);
     }
+    
     void saveActiveId(freshId);
+    
+    // Load history for active session if project root is known
+    const projectPath = get().live.getWorkspaceRoot();
+    if (projectPath) {
+      const history = await chatRepository.getHistory(projectPath);
+      if (history.length > 0) {
+        seedMessages.set(freshId, history);
+      }
+    }
+
     set({
       sessions: nextSessions,
       activeSessionId: freshId,
@@ -413,14 +452,24 @@ export const useChatStore = create<StoreState>((set, get) => ({
       set({ activeSessionId: id, agentMeta: IDLE_META });
       void saveActiveId(id);
     };
+    
     if (chats.has(id) || seedMessages.has(id)) {
       flip();
       return;
     }
-    void loadMessages(id).then((m) => {
-      if (m && m.length > 0 && !chats.has(id)) seedMessages.set(id, m);
-      flip();
-    });
+
+    const projectPath = get().live.getWorkspaceRoot();
+    if (projectPath) {
+      void chatRepository.getHistory(projectPath).then((m) => {
+        if (m && m.length > 0 && !chats.has(id)) seedMessages.set(id, m);
+        flip();
+      });
+    } else {
+      void loadLegacyMessages(id).then((m) => {
+        if (m && m.length > 0 && !chats.has(id)) seedMessages.set(id, m);
+        flip();
+      });
+    }
   },
 
   deleteSession: (id) => {
@@ -433,8 +482,11 @@ export const useChatStore = create<StoreState>((set, get) => ({
       clearTimeout(pend.timer);
       pendingPersist.delete(id);
     }
-    void deleteSessionData(id);
-    void chatRepository.clearProject(id);
+    
+    // We don't delete from SQLite here because it's project-scoped and might contain multiple sessions' worth of history
+    // But we clear legacy data
+    void deleteLegacyMessages(id);
+    
     if (remaining.length === 0) {
       const fresh: SessionMeta = {
         id: newSessionId(),
@@ -465,13 +517,9 @@ export const useChatStore = create<StoreState>((set, get) => ({
   persistMessages: (id, messages) => {
     const existing = pendingPersist.get(id);
     if (existing) clearTimeout(existing.timer);
-    const timer = setTimeout(() => {
-      const entry = pendingPersist.get(id);
-      if (!entry) return;
-      pendingPersist.delete(id);
-      void saveMessages(id, entry.latest);
-    }, PERSIST_DEBOUNCE_MS);
+    const timer = setTimeout(() => flushPersistEntry(id), PERSIST_DEBOUNCE_MS);
     pendingPersist.set(id, { latest: messages, timer });
+    
     const sessions = get().sessions;
     const meta = sessions.find((s) => s.id === id);
     if (!meta) return;

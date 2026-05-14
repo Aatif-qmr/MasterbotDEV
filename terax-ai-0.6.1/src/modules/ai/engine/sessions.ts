@@ -1,17 +1,17 @@
-import type { UIMessage } from "../store/chatStore";
 import { LazyStore } from "@tauri-apps/plugin-store";
+import type { UIMessage } from "../store/chatStore";
 
 export type SessionMeta = {
   id: string;
   title: string;
   createdAt: number;
   updatedAt: number;
+  projectPath?: string; // Track which project this session belongs to
 };
 
 const STORE_PATH = "terax-ai-sessions.json";
 const KEY_SESSIONS = "sessions";
 const KEY_ACTIVE = "activeId";
-const messagesKey = (id: string) => `messages:${id}`;
 
 const store = new LazyStore(STORE_PATH, { defaults: {}, autoSave: 200 });
 
@@ -21,9 +21,6 @@ export type LoadedSessions = {
 };
 
 export async function loadAll(): Promise<LoadedSessions> {
-  // One IPC roundtrip via entries() rather than two parallel get()s. Per-
-  // session messages are loaded lazily via `loadMessages` only when a
-  // session is opened, so cold boot stays at a single store call.
   const entries = await store.entries();
   let sessions: SessionMeta[] | undefined;
   let activeId: string | null | undefined;
@@ -34,10 +31,6 @@ export async function loadAll(): Promise<LoadedSessions> {
   return { sessions: sessions ?? [], activeId: activeId ?? null };
 }
 
-export async function loadMessages(id: string): Promise<UIMessage[] | null> {
-  return (await store.get<UIMessage[]>(messagesKey(id))) ?? null;
-}
-
 export async function saveSessionsList(sessions: SessionMeta[]): Promise<void> {
   await store.set(KEY_SESSIONS, sessions);
 }
@@ -46,15 +39,14 @@ export async function saveActiveId(id: string | null): Promise<void> {
   await store.set(KEY_ACTIVE, id);
 }
 
-export async function saveMessages(
-  id: string,
-  messages: UIMessage[],
-): Promise<void> {
-  await store.set(messagesKey(id), messages);
+// Global messages storage is deprecated in favor of project-scoped SQLite
+// These are kept for backward compatibility during migration
+export async function loadLegacyMessages(id: string): Promise<UIMessage[] | null> {
+  return (await store.get<UIMessage[]>(`messages:${id}`)) ?? null;
 }
 
-export async function deleteSessionData(id: string): Promise<void> {
-  await store.delete(messagesKey(id));
+export async function deleteLegacyMessages(id: string): Promise<void> {
+  await store.delete(`messages:${id}`);
 }
 
 export function newSessionId(): string {
