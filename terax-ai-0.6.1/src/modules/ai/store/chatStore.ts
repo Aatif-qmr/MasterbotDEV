@@ -6,7 +6,7 @@ import {
   type ModelId,
   type ProviderId,
 } from "../config";
-import { EMPTY_PROVIDER_KEYS, type ProviderKeys } from "../core/keyring";
+import { EMPTY_PROVIDER_KEYS, type ProviderKeys } from "../engine/keyring";
 import {
   deleteSessionData,
   deriveTitle,
@@ -17,7 +17,7 @@ import {
   saveMessages,
   saveSessionsList,
   type SessionMeta,
-} from "../core/sessions";
+} from "../engine/sessions";
 import { chatRepository } from "../storage/repository";
 import { GeminiSession, createTeraxGeminiAgent } from "../engine/session";
 import { GeminiEventType } from "../engine/gemini_types";

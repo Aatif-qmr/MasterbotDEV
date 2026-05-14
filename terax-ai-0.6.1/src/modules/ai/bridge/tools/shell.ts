@@ -1,7 +1,7 @@
 import { tool } from "../../engine/types";
 import { z } from "zod";
-import { native } from "../../core/native";
-import { checkShellCommand } from "../../core/security";
+import { native } from "../../bridge/native";
+import { checkShellCommand } from "../../engine/security";
 import type { ToolContext } from "./context";
 
 /**

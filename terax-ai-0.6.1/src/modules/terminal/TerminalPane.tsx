@@ -1,7 +1,7 @@
 import { useTheme } from "@/modules/theme";
 import type { SearchAddon } from "@xterm/addon-search";
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
-import { useTerminalSession, type TeraxOpenInput } from "./lib/useTerminalSession";
+import { useTerminalSession, type TeraxOpenInput } from "./core/useTerminalSession";
 
 export type TerminalPaneHandle = {
   write: (data: string) => void;

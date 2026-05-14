@@ -2,8 +2,8 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { TooltipProvider } from "@/components/ui/tooltip";
+} from "@/modules/core/ui/resizable";
+import { TooltipProvider } from "@/modules/core/ui/tooltip";
 import { cn } from "@/modules/core/utils";
 import {
   AgentRunBridge,
@@ -14,8 +14,8 @@ import {
   SelectionAskAi,
   useChatStore,
 } from "@/modules/ai";
-import { AiInputBarConnect } from "@/modules/ai/components/AiInputBar";
-import { AiComposerProvider } from "@/modules/ai/core/composer";
+import { AiInputBarConnect } from "@/modules/ai/ui/AiInputBar";
+import { AiComposerProvider } from "@/modules/ai/ui/composer";
 import { useAgentsStore } from "@/modules/ai/store/agentsStore";
 import { useSnippetsStore } from "@/modules/ai/store/snippetsStore";
 import {

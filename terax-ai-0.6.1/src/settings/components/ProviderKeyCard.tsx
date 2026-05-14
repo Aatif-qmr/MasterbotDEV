@@ -1,7 +1,7 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/modules/core/ui/badge";
+import { Button } from "@/modules/core/ui/button";
+import { Input } from "@/modules/core/ui/input";
+import { Spinner } from "@/modules/core/ui/spinner";
 import { cn } from "@/modules/core/utils";
 import type { ProviderInfo } from "@/modules/ai/config";
 import {

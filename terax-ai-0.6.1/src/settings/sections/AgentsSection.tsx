@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/modules/core/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/modules/core/ui/dialog";
+import { Input } from "@/modules/core/ui/input";
+import { Textarea } from "@/modules/core/ui/textarea";
 import { cn } from "@/modules/core/utils";
-import { AGENT_ICONS } from "@/modules/ai/components/AgentSwitcher";
+import { AGENT_ICONS } from "@/modules/ai/ui/AgentSwitcher";
 import {
   BUILTIN_AGENTS,
   type Agent,
@@ -19,7 +19,7 @@ import {
   isValidHandle,
   normalizeHandle,
   type Snippet,
-} from "@/modules/ai/core/snippets";
+} from "@/modules/ai/engine/snippets";
 import { newAgentId, useAgentsStore } from "@/modules/ai/store/agentsStore";
 import {
   newSnippetId,

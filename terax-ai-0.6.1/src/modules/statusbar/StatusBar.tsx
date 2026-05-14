@@ -1,8 +1,8 @@
-import { AgentStatusPill } from "@/modules/ai/components/AgentStatusPill";
+import { AgentStatusPill } from "@/modules/ai/ui/AgentStatusPill";
 import {
   AiOpenButton,
   AiStatusBarControls,
-} from "@/modules/ai/components/AiStatusBarControls";
+} from "@/modules/ai/ui/AiStatusBarControls";
 import { useChatStore } from "@/modules/ai";
 import { Globe02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";

@@ -4,7 +4,7 @@ import {
   loadTodos as persistLoad,
   saveTodos as persistSave,
   type Todo,
-} from "../core/todos";
+} from "../engine/todos";
 
 type TodosState = {
   /** Map of sessionId -> todos. */

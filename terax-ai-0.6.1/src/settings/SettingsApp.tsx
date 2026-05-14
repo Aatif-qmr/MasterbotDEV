@@ -1,5 +1,5 @@
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { WindowControls } from "@/components/WindowControls";
+import { Tabs, TabsList, TabsTrigger } from "@/modules/core/ui/tabs";
+import { WindowControls } from "@/modules/core/ui/WindowControls";
 import { IS_MAC, USE_CUSTOM_WINDOW_CONTROLS } from "@/modules/core/platform";
 import type { SettingsTab } from "@/modules/settings/openSettingsWindow";
 import { usePreferencesStore } from "@/modules/settings/preferences";

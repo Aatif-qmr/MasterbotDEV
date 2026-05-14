@@ -1,14 +1,14 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/modules/core/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/modules/core/ui/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger } from "@/modules/core/ui/tabs";
 import { fmtShortcut, MOD_KEY } from "@/modules/core/platform";
 import { cn } from "@/modules/core/utils";
-import { fileIconUrl } from "@/modules/explorer/lib/iconResolver";
+import { fileIconUrl } from "@/modules/explorer/core/iconResolver";
 import {
   Cancel01Icon,
   ComputerTerminal02Icon,
@@ -20,7 +20,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useRef } from "react";
-import type { EditorTab, Tab } from "./lib/useTabs";
+import type { EditorTab, Tab } from "./core/useTabs";
 
 type Props = {
   tabs: Tab[];

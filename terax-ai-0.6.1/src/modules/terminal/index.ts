@@ -4,7 +4,7 @@ export {
   disposeSession,
   respawnSession,
   type TeraxOpenInput,
-} from "./lib/useTerminalSession";
+} from "./core/useTerminalSession";
 export {
   hasLeaf,
   isLeaf,
@@ -12,4 +12,4 @@ export {
   type PaneId,
   type PaneNode,
   type SplitDir,
-} from "./lib/panes";
+} from "./core/panes";

@@ -29,7 +29,7 @@ import { initVimGlobals, vimHandlersExtension } from "../core/vim";
 initVimGlobals();
 import { resolveLanguage } from "../core/languageResolver";
 import { useDocument } from "../core/useDocument";
-import { getKey } from "@/modules/ai/core/keyring";
+import { getKey } from "@/modules/ai/engine/keyring";
 import { onKeysChanged } from "@/modules/settings/store";
 
 export type EditorPaneHandle = {

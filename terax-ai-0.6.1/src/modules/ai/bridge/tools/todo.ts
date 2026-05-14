@@ -1,6 +1,6 @@
 import { tool } from "../../engine/types";
 import { z } from "zod";
-import { newTodoId, validateTodos, type Todo } from "../../core/todos";
+import { newTodoId, validateTodos, type Todo } from "../../engine/todos";
 import { useTodosStore } from "../../store/todoStore";
 import type { ToolContext } from "./context";
 

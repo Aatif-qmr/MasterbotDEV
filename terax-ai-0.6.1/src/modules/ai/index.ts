@@ -1,8 +1,8 @@
-export { AgentRunBridge } from "./components/AgentRunBridge";
-export { AgentStatusPill } from "./components/AgentStatusPill";
-export { AiInputBar } from "./components/AiInputBar";
-export { AiMiniWindow } from "./components/AiMiniWindow";
-export { SelectionAskAi } from "./components/SelectionAskAi";
+export { AgentRunBridge } from "./ui/AgentRunBridge";
+export { AgentStatusPill } from "./ui/AgentStatusPill";
+export { AiInputBar } from "./ui/AiInputBar";
+export { AiMiniWindow } from "./ui/AiMiniWindow";
+export { SelectionAskAi } from "./ui/SelectionAskAi";
 export {
   EMPTY_PROVIDER_KEYS,
   getAllKeys,
@@ -11,7 +11,7 @@ export {
   clearKey,
   hasAnyKey,
   type ProviderKeys,
-} from "./core/keyring";
+} from "./engine/keyring";
 export {
   getActiveProviderKey,
   getOrCreateChat,

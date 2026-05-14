@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/modules/core/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { WindowControls } from "@/components/WindowControls";
+} from "@/modules/core/ui/dropdown-menu";
+import { WindowControls } from "@/modules/core/ui/WindowControls";
 import { IS_MAC, KEY_SEP, USE_CUSTOM_WINDOW_CONTROLS } from "@/modules/core/platform";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import {

@@ -1,4 +1,4 @@
-import { native } from '../ai/core/native';
+import { native } from '../ai/bridge/native';
 
 export interface DesignToken {
   name: string;

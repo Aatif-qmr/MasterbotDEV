@@ -27,7 +27,9 @@
       "@/modules/ai/bridge/*": ["./src/modules/ai/bridge/*"],
       "@/modules/ai/storage/*": ["./src/modules/ai/storage/*"],
       "@/modules/ai/store/*": ["./src/modules/ai/store/*"],
-      "@/modules/ai/agents/*": ["./src/modules/ai/agents/*"]
+      "@/modules/ai/agents/*": ["./src/modules/ai/agents/*"],
+      "@/modules/ai/ui/*": ["./src/modules/ai/ui/*"],
+      "@/modules/core/ui/*": ["./src/modules/core/ui/*"]
     }
   },
   "include": ["src"],

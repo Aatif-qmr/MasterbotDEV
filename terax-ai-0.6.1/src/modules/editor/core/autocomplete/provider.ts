@@ -4,7 +4,7 @@ import {
   type AutocompleteProviderId,
 } from "@/modules/ai/config";
 import { buildLanguageModel } from "@/modules/ai/agents/agent";
-import { EMPTY_PROVIDER_KEYS } from "@/modules/ai/core/keyring";
+import { EMPTY_PROVIDER_KEYS } from "@/modules/ai/engine/keyring";
 const generateText = async (..._args: unknown[]) => ({ text: '' });
 import {
   buildUserPrompt,

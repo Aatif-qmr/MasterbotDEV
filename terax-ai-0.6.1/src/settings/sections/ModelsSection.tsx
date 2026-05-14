@@ -1,12 +1,12 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/modules/core/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+} from "@/modules/core/ui/dropdown-menu";
+import { Input } from "@/modules/core/ui/input";
+import { Switch } from "@/modules/core/ui/switch";
 import { cn } from "@/modules/core/utils";
 import {
   AUTOCOMPLETE_PROVIDERS,
@@ -20,7 +20,7 @@ import {
   type ModelId,
   type ProviderId,
 } from "@/modules/ai/config";
-import { clearKey, getAllKeys, setKey } from "@/modules/ai/core/keyring";
+import { clearKey, getAllKeys, setKey } from "@/modules/ai/engine/keyring";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import {
   emitKeysChanged,

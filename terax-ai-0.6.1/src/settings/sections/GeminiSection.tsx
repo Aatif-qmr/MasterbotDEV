@@ -1,5 +1,5 @@
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Label } from "@/modules/core/ui/label";
+import { Switch } from "@/modules/core/ui/switch";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import {
   setGeminiNativeEnabled,

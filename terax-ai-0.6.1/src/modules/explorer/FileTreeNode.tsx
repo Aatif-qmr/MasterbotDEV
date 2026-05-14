@@ -4,7 +4,7 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+} from "@/modules/core/ui/context-menu";
 import { cn } from "@/modules/core/utils";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -14,10 +14,10 @@ import {
   copyToClipboard,
   relativePath,
   revealInFinder,
-} from "./lib/contextActions";
-import { fileIconUrl, folderIconUrl } from "./lib/iconResolver";
-import { COMPACT_CONTENT, COMPACT_ITEM } from "./lib/menuItemClass";
-import type { DirEntry, useFileTree } from "./lib/useFileTree";
+} from "./core/contextActions";
+import { fileIconUrl, folderIconUrl } from "./core/iconResolver";
+import { COMPACT_CONTENT, COMPACT_ITEM } from "./core/menuItemClass";
+import type { DirEntry, useFileTree } from "./core/useFileTree";
 
 type Tree = ReturnType<typeof useFileTree>;
 

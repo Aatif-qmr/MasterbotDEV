@@ -1,7 +1,7 @@
 import { tool } from "../../engine/types";
 import { z } from "zod";
-import { native } from "../../core/native";
-import { checkWritable } from "../../core/security";
+import { native } from "../../bridge/native";
+import { checkWritable } from "../../engine/security";
 import { newQueuedEditId, usePlanStore } from "../../store/planStore";
 import { resolvePath, type ToolContext } from "./context";
 

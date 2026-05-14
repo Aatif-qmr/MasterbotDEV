@@ -53,7 +53,7 @@ export {
  * Quick start example:
  * 
  * ```typescript
- * import { createTeraxGeminiAgent } from './modules/ai/lib/gemini';
+ * import { createTeraxGeminiAgent } from './modules/ai/core/gemini';
  * 
  * // Create the sole Gemini agent for Terax
  * const agent = createTeraxGeminiAgent({

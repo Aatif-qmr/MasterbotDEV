@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/modules/core/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Kbd, KbdGroup } from "@/components/ui/kbd";
+} from "@/modules/core/ui/dropdown-menu";
+import { Kbd, KbdGroup } from "@/modules/core/ui/kbd";
 import { fmtShortcut, MOD_KEY } from "@/modules/core/platform";
 import {
   ArrowDown01Icon,

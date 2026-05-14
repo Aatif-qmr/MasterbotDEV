@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/modules/core/ui/badge";
+import { Button } from "@/modules/core/ui/button";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import type { AiDiffStatus } from "@/modules/tabs";
 import { presentableDiff, unifiedMergeView } from "@codemirror/merge";

@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/modules/core/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+} from "@/modules/core/ui/dropdown-menu";
+import { Input } from "@/modules/core/ui/input";
 import {
   ArrowReloadHorizontalIcon,
   Globe02Icon,

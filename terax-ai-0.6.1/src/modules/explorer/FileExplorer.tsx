@@ -1,13 +1,13 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/modules/core/ui/button";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from "@/modules/core/ui/context-menu";
+import { Input } from "@/modules/core/ui/input";
+import { ScrollArea } from "@/modules/core/ui/scroll-area";
 import {
   Cancel01Icon,
   FileAddIcon,
@@ -22,10 +22,10 @@ import { motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FileTreeNode } from "./FileTreeNode";
 import { InlineInput } from "./InlineInput";
-import { copyToClipboard, revealInFinder } from "./lib/contextActions";
-import { fileIconUrl, folderIconUrl } from "./lib/iconResolver";
-import { COMPACT_CONTENT, COMPACT_ITEM } from "./lib/menuItemClass";
-import { useFileTree } from "./lib/useFileTree";
+import { copyToClipboard, revealInFinder } from "./core/contextActions";
+import { fileIconUrl, folderIconUrl } from "./core/iconResolver";
+import { COMPACT_CONTENT, COMPACT_ITEM } from "./core/menuItemClass";
+import { useFileTree } from "./core/useFileTree";
 
 type SearchHit = {
   path: string;

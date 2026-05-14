@@ -3,11 +3,11 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
+} from "@/modules/core/ui/resizable";
 import type { SearchAddon } from "@xterm/addon-search";
 import { TerminalPane, type TerminalPaneHandle } from "./TerminalPane";
-import type { PaneNode } from "./lib/panes";
-import type { TeraxOpenInput } from "./lib/useTerminalSession";
+import type { PaneNode } from "./core/panes";
+import type { TeraxOpenInput } from "./core/useTerminalSession";
 
 type LeafBundle = {
   setRef: (h: TerminalPaneHandle | null) => void;

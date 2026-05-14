@@ -3,8 +3,8 @@ import type { SearchAddon } from "@xterm/addon-search";
 import { useEffect, useRef } from "react";
 import { PaneTreeView } from "./PaneTreeView";
 import type { TerminalPaneHandle } from "./TerminalPane";
-import { leafIds } from "./lib/panes";
-import { type TeraxOpenInput } from "./lib/useTerminalSession";
+import { leafIds } from "./core/panes";
+import { type TeraxOpenInput } from "./core/useTerminalSession";
 
 type Props = {
   tabs: Tab[];

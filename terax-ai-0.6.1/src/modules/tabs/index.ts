@@ -9,5 +9,5 @@ export {
   type AiDiffTab,
   type AiDiffStatus,
   type TabPatch,
-} from "./lib/useTabs";
-export { useWorkspaceCwd } from "./lib/useWorkspaceCwd";
+} from "./core/useTabs";
+export { useWorkspaceCwd } from "./core/useWorkspaceCwd";

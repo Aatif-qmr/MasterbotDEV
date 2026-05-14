@@ -4,10 +4,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
+} from "@/modules/core/ui/dialog";
+import { Kbd, KbdGroup } from "@/modules/core/ui/kbd";
+import { ScrollArea } from "@/modules/core/ui/scroll-area";
+import { Button } from "@/modules/core/ui/button";
 import { Settings01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { usePreferencesStore } from "@/modules/settings/preferences";

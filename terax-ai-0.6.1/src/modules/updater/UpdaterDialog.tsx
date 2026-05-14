@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/modules/core/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,8 +6,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
+} from "@/modules/core/ui/dialog";
+import { Progress } from "@/modules/core/ui/progress";
 import { useUpdater } from "./useUpdater";
 
 function formatBytes(n: number): string {

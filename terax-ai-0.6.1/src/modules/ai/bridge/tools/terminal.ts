@@ -1,6 +1,6 @@
 import { tool } from "../../engine/types";
 import { z } from "zod";
-import { checkShellCommand } from "../../core/security";
+import { checkShellCommand } from "../../engine/security";
 import type { ToolContext } from "./context";
 
 export function buildTerminalTools(ctx: ToolContext) {

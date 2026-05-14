@@ -9,4 +9,4 @@ export {
 export {
   useGlobalShortcuts,
   type ShortcutHandlers,
-} from "./lib/useGlobalShortcuts";
+} from "./core/useGlobalShortcuts";
