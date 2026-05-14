@@ -56,7 +56,7 @@ export class GeminiAgent {
       throw new Error('NOT_LOGGED_IN');
     }
 
-    this.client = new GoogleGenAI(token.access_token as string);
+    this.client = new GoogleGenAI({ apiKey: token.access_token as string });
     return this.client;
   }
 

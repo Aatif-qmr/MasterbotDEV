@@ -9,6 +9,7 @@ pub struct AuthToken {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct UserInfo {
     pub email: String,
     pub picture: Option<String>,

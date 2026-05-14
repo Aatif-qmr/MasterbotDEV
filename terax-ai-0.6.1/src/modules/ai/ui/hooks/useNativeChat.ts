@@ -20,7 +20,7 @@ export function useNativeChat(options: { sessionId: string }) {
 
   const append = useCallback(async (message: { content: string; role: 'user' }) => {
     if (!sessionRef.current) {
-      sessionRef.current = agentRef.current.session(options.sessionId);
+      sessionRef.current = await agentRef.current.session(options.sessionId);
       await sessionRef.current.initialize();
     }
 

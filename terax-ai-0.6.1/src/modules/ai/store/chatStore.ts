@@ -53,7 +53,7 @@ export class Chat {
 
   async initialize() {
     if (!this.session) {
-      this.session = this.agent.session(this.id);
+      this.session = await this.agent.session(this.id);
       await this.session.initialize();
     }
   }

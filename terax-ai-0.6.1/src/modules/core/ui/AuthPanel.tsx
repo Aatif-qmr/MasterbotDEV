@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { auth, AuthToken } from "../modules/ai/engine/auth";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/button"; // Reusing button as card for now if card doesn't exist
+import { useState, useEffect } from "react";
+import { auth, AuthToken } from "@/modules/ai/engine/auth";
+import { Button } from "@/modules/core/ui/button";
 import { LogIn, LogOut, ShieldCheck, User } from "lucide-react";
 
 export function AuthPanel() {
@@ -62,7 +61,7 @@ export function AuthPanel() {
                 <div className="flex-1">
                   <p className="text-sm font-medium">Google Account Connected</p>
                   <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                    Access Token: {token.access_token.slice(0, 10)}...
+                    Access Token: {String(token.access_token).slice(0, 10)}...
                   </p>
                 </div>
                 <ShieldCheck className="h-5 w-5 text-green-500" />
