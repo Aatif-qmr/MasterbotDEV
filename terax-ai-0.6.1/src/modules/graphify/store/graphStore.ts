@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { type GraphData, type ViewportState, type InteractionState } from '../types';
-import { generateGraph } from '../lib/api';
+import { generateGraph } from '../core/api';
 
 export type GraphMode = 'dependencies' | 'workflow';
 

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { cn } from "@/modules/core/utils";
 import { AGENT_ICONS } from "@/modules/ai/components/AgentSwitcher";
 import {
   BUILTIN_AGENTS,

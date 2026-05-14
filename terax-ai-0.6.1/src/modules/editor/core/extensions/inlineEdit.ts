@@ -1,7 +1,7 @@
 import { EditorView, Decoration, WidgetType } from '@codemirror/view';
 import { StateField, StateEffect, type Transaction, EditorState, RangeSetBuilder } from '@codemirror/state';
 import { type InlineEdit } from '../../types';
-import { InlineEditWidget } from '../../components/InlineEditWidget';
+import { InlineEditWidget } from '../../ui/InlineEditWidget';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { useEditorStore } from '../../store/editorStore';

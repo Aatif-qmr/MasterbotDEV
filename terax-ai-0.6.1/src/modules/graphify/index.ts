@@ -1,5 +1,5 @@
 export * from './types';
 export * from './store/graphStore';
-export * from './lib/api';
-export { GraphCanvas } from './components/GraphCanvas';
-export { GraphView } from './components/GraphView';
+export * from './core/api';
+export { GraphCanvas } from './core/GraphCanvas';
+export { GraphView } from './core/GraphView';

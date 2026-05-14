@@ -9,9 +9,9 @@ import { Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import CodeMirror, { type ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { useEffect, useMemo, useRef } from "react";
-import { buildSharedExtensions, languageCompartment } from "./lib/extensions/index";
-import { resolveLanguage } from "./lib/languageResolver";
-import { EDITOR_THEME_EXT } from "./lib/themes";
+import { buildSharedExtensions, languageCompartment } from "../core/extensions/index";
+import { resolveLanguage } from "../core/languageResolver";
+import { EDITOR_THEME_EXT } from "../core/themes";
 
 type Props = {
   path: string;

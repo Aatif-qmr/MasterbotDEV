@@ -1,5 +1,5 @@
-import { USE_CUSTOM_WINDOW_CONTROLS } from "@/lib/platform";
-import { cn } from "@/lib/utils";
+import { USE_CUSTOM_WINDOW_CONTROLS } from "@/modules/core/platform";
+import { cn } from "@/modules/core/utils";
 import {
   Cancel01Icon,
   Copy01Icon,

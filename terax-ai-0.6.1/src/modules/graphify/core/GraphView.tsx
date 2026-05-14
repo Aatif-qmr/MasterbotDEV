@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { GraphCanvas } from './GraphCanvas';
 import { useGraphStore } from '../store/graphStore';
-import { cn } from '@/lib/utils';
+import { cn } from '@/modules/core/utils';
 
 interface GraphViewProps {
   projectRoot: string;

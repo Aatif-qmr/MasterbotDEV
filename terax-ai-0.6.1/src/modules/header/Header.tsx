@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { WindowControls } from "@/components/WindowControls";
-import { IS_MAC, KEY_SEP, USE_CUSTOM_WINDOW_CONTROLS } from "@/lib/platform";
+import { IS_MAC, KEY_SEP, USE_CUSTOM_WINDOW_CONTROLS } from "@/modules/core/platform";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import {
   getBindingTokens,

@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Kbd } from "@/components/ui/kbd";
 import { Spinner } from "@/components/ui/spinner";
-import { fmtShortcut, MOD_KEY } from "@/lib/platform";
-import { cn } from "@/lib/utils";
+import { fmtShortcut, MOD_KEY } from "@/modules/core/platform";
+import { cn } from "@/modules/core/utils";
 import { openSettingsWindow } from "@/modules/settings/openSettingsWindow";
 import {
   Add01Icon,

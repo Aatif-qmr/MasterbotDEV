@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useGraphStore } from '../store/graphStore';
-import { cn } from '@/lib/utils';
+import { cn } from '@/modules/core/utils';
 
 const NODE_COLORS: Record<string, string> = {
   file: '#3B82F6',

@@ -1,6 +1,6 @@
 import { Check, X, AlertCircle } from 'lucide-react';
 import { useEditorStore } from '../store/editorStore';
-import { cn } from '@/lib/utils';
+import { cn } from '@/modules/core/utils';
 
 interface InlineEditWidgetProps {
   editId: string;

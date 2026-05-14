@@ -7,7 +7,7 @@ import {
 import { keymap } from "@codemirror/view";
 import { usePreferencesStore } from "@/modules/settings/preferences";
 import CodeMirror, { type ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import { EDITOR_THEME_EXT } from "./lib/themes";
+import { EDITOR_THEME_EXT } from "../core/themes";
 import {
   forwardRef,
   useEffect,
@@ -23,12 +23,12 @@ import {
   languageCompartment,
   loadHeavyExtensions,
   vimCompartment,
-} from "./lib/extensions/index";
-import { initVimGlobals, vimHandlersExtension } from "./lib/vim";
+} from "../core/extensions/index";
+import { initVimGlobals, vimHandlersExtension } from "../core/vim";
 
 initVimGlobals();
-import { resolveLanguage } from "./lib/languageResolver";
-import { useDocument } from "./lib/useDocument";
+import { resolveLanguage } from "../core/languageResolver";
+import { useDocument } from "../core/useDocument";
 import { getKey } from "@/modules/ai/core/keyring";
 import { onKeysChanged } from "@/modules/settings/store";
 

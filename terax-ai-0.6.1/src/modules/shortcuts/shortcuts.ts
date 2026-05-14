@@ -1,4 +1,4 @@
-import { IS_MAC, MOD_PROP } from "@/lib/platform";
+import { IS_MAC, MOD_PROP } from "@/modules/core/platform";
 
 /**
  * Single source of truth for keyboard shortcuts.

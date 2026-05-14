@@ -1,5 +1,5 @@
 import { PopoverContent } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn } from "@/modules/core/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { SlashCommandMeta } from "../core/slashCommands";
 import type { Snippet } from "../core/snippets";

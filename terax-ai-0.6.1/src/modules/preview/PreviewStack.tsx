@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/modules/core/utils";
 import type { PreviewTab, Tab } from "@/modules/tabs";
 import { useEffect, useRef } from "react";
 import { PreviewPane, type PreviewPaneHandle } from "./PreviewPane";

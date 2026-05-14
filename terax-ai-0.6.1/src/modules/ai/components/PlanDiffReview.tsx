@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/modules/core/utils";
 import {
   ArrowDown01Icon,
   Cancel01Icon,

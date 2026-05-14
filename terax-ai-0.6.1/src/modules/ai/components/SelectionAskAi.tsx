@@ -1,5 +1,5 @@
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { fmtShortcut, MOD_KEY } from "@/lib/platform";
+import { fmtShortcut, MOD_KEY } from "@/modules/core/platform";
 import { motion } from "motion/react";
 import { useEffect } from "react";
 
