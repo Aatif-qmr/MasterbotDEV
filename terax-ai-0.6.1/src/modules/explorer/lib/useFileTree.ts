@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useState } from "react";
 
 export type DirEntry = {
@@ -114,6 +115,43 @@ export function useFileTree(rootPath: string | null, options?: Options) {
     },
     [fetchChildren],
   );
+
+  // --- Watcher Integration ---
+  useEffect(() => {
+    if (!rootPath) return;
+
+    let unlistenFn: (() => void) | null = null;
+
+    const setup = async () => {
+      try {
+        await invoke("watch_project", { path: rootPath });
+
+        unlistenFn = await listen<{ path: string; eventType: string }>(
+          "file-changed",
+          (event) => {
+            const changedPath = event.payload.path;
+            const parent = dirname(changedPath);
+            // Refresh parent to show new/deleted files
+            refresh(parent);
+            // If the changed path itself is a known node (likely a directory), refresh it too
+            setNodes((curr) => {
+              if (curr[changedPath]) refresh(changedPath);
+              return curr;
+            });
+          },
+        );
+      } catch (e) {
+        console.error("Failed to setup file watcher:", e);
+      }
+    };
+
+    setup();
+
+    return () => {
+      if (unlistenFn) unlistenFn();
+      void invoke("unwatch_project", { path: rootPath }).catch(() => {});
+    };
+  }, [rootPath, refresh]);
 
   // --- mutations ---
 

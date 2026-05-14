@@ -4,31 +4,22 @@ import { lintGutter } from "@codemirror/lint";
 import { search } from "@codemirror/search";
 import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { 
-  inlineEditField, 
-  inlineEditCleanupFilter, 
-  inlineEditTheme 
-} from "./extensions/inlineEdit";
 
 // Compartments allow runtime reconfiguration without rebuilding state.
 export const languageCompartment = new Compartment();
 export const readOnlyCompartment = new Compartment();
 export const wrapCompartment = new Compartment();
 export const vimCompartment = new Compartment();
+export const dynamicExtensionsCompartment = new Compartment();
 
 // Only what basicSetup doesn't already cover, to avoid duplicate extensions.
-// basicSetup gives us line numbers, fold gutter, history, indentOnInput,
-// bracketMatching, closeBrackets, autocompletion, highlightActiveLine,
-// highlightSelectionMatches and the search keymap.
 export function buildSharedExtensions(): Extension[] {
   return [
     indentUnit.of("  "),
     EditorState.tabSize.of(2),
     search({ top: true }),
     lintGutter(),
-    inlineEditField,
-    inlineEditCleanupFilter,
-    inlineEditTheme,
+    dynamicExtensionsCompartment.of([]),
     EditorView.theme({
       "&, &.cm-editor, &.cm-editor.cm-focused": {
         backgroundColor: "transparent !important",
@@ -101,4 +92,32 @@ export function buildSharedExtensions(): Extension[] {
       },
     }),
   ];
+}
+
+/**
+ * Dynamically loads heavy editor extensions like AI Autocomplete and Inline Edits.
+ * Returns an array of extensions to be injected via dynamicExtensionsCompartment.
+ */
+export async function loadHeavyExtensions(options: {
+  autocomplete: boolean;
+  inlineEdit: boolean;
+  autocompleteCtx?: any;
+}): Promise<Extension[]> {
+  const extensions: Extension[] = [];
+
+  if (options.inlineEdit) {
+    const { 
+      inlineEditField, 
+      inlineEditCleanupFilter, 
+      inlineEditTheme 
+    } = await import("./inlineEdit");
+    extensions.push(inlineEditField, inlineEditCleanupFilter, inlineEditTheme);
+  }
+
+  if (options.autocomplete && options.autocompleteCtx) {
+    const { inlineCompletion } = await import("../autocomplete/inlineExtension");
+    extensions.push(inlineCompletion(options.autocompleteCtx));
+  }
+
+  return extensions;
 }

@@ -62,6 +62,7 @@ pub struct GraphData {
     pub metadata: GraphMetadata,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GraphModuleSchema {
@@ -70,6 +71,7 @@ pub struct GraphModuleSchema {
     pub interaction: InteractionState,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ViewportState {
@@ -77,6 +79,7 @@ pub struct ViewportState {
     pub pan: Point,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Point {
@@ -84,6 +87,7 @@ pub struct Point {
     pub y: f64,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct InteractionState {
@@ -91,23 +95,27 @@ pub struct InteractionState {
     pub hovered_node_id: Option<String>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NodeDetails {
     pub id: String,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ParsedFile {
     pub path: String,
     pub dependencies: FileDependencies,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FileDependencies {
     pub imports: Vec<Dependency>,
     pub exports: Vec<Dependency>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Dependency {
     pub path: String,

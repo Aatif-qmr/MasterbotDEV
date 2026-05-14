@@ -19,15 +19,16 @@ import { Prec } from "@codemirror/state";
 import { vim } from "@replit/codemirror-vim";
 import {
   buildSharedExtensions,
+  dynamicExtensionsCompartment,
   languageCompartment,
+  loadHeavyExtensions,
   vimCompartment,
-} from "./lib/extensions";
+} from "./lib/extensions/index";
 import { initVimGlobals, vimHandlersExtension } from "./lib/vim";
 
 initVimGlobals();
 import { resolveLanguage } from "./lib/languageResolver";
 import { useDocument } from "./lib/useDocument";
-import { inlineCompletion } from "./lib/autocomplete/inlineExtension";
 import { getKey } from "@/modules/ai/core/keyring";
 import { onKeysChanged } from "@/modules/settings/store";
 
@@ -93,6 +94,50 @@ export const EditorPane = forwardRef<EditorPaneHandle, Props>(
         unsubPrefs();
       };
     }, []);
+
+    useEffect(() => {
+      const view = cmRef.current?.view;
+      if (!view) return;
+
+      let cancelled = false;
+      const load = async () => {
+        const s = usePreferencesStore.getState();
+        const exts = await loadHeavyExtensions({
+          autocomplete: s.autocompleteEnabled,
+          inlineEdit: true,
+          autocompleteCtx: {
+            getPrefs: () => {
+              const s = usePreferencesStore.getState();
+              return {
+                enabled: s.autocompleteEnabled,
+                provider: s.autocompleteProvider,
+                modelId: s.autocompleteModelId,
+                apiKey: apiKeyRef.current,
+                lmstudioBaseURL: s.lmstudioBaseURL,
+              };
+            },
+            getPath: () => pathRef.current,
+            getLanguage: () => languageRef.current,
+          },
+        });
+        if (cancelled) return;
+        view.dispatch({
+          effects: dynamicExtensionsCompartment.reconfigure(exts),
+        });
+      };
+
+      void load();
+      const unsub = usePreferencesStore.subscribe((state, prev) => {
+        if (state.autocompleteEnabled !== prev.autocompleteEnabled) {
+          void load();
+        }
+      });
+      return () => {
+        cancelled = true;
+        unsub();
+      };
+    }, []);
+
     const themeExt = EDITOR_THEME_EXT[editorThemeId] ?? EDITOR_THEME_EXT.atomone;
 
     // Stabilize save + onSaved via refs so the extensions array never changes
@@ -126,20 +171,6 @@ export const EditorPane = forwardRef<EditorPaneHandle, Props>(
         })),
         ...buildSharedExtensions(),
         languageCompartment.of([]),
-        inlineCompletion({
-          getPrefs: () => {
-            const s = usePreferencesStore.getState();
-            return {
-              enabled: s.autocompleteEnabled,
-              provider: s.autocompleteProvider,
-              modelId: s.autocompleteModelId,
-              apiKey: apiKeyRef.current,
-              lmstudioBaseURL: s.lmstudioBaseURL,
-            };
-          },
-          getPath: () => pathRef.current,
-          getLanguage: () => languageRef.current,
-        }),
         keymap.of([
           {
             key: "Mod-s",

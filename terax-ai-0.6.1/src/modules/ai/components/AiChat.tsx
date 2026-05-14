@@ -21,6 +21,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { memo, useCallback } from "react";
 import { AiToolApproval } from "./AiToolApproval";
 import type { UIMessage, ChatStatus, UIMessagePart } from "../engine/types";
+import { FixedSizeList, type ListChildComponentProps } from "react-window";
+import { AutoSizer } from "react-virtualized-auto-sizer";
+import { useStickToBottomContext } from "use-stick-to-bottom";
 
 function CommandSnippet({ name }: { name: string }) {
   const meta = SLASH_COMMANDS[name];
@@ -79,8 +82,24 @@ export function AiChatView({
   const showSpinner = isBusy && lastMessage?.role === "user";
 
   const onApproval = useCallback(
-    (id: string, approved: boolean) => addToolApprovalResponse({ id, approved }),
+    (id: string, approved: boolean) =>
+      addToolApprovalResponse({ id, approved }),
     [addToolApprovalResponse],
+  );
+
+  const { scrollRef, contentRef } = useStickToBottomContext();
+
+  const Row = useCallback(
+    ({ index, style }: ListChildComponentProps) => {
+      const m = messages[index];
+      if (!m) return null;
+      return (
+        <div style={style} className="px-3">
+          <RenderedMessage message={m} onApproval={onApproval} />
+        </div>
+      );
+    },
+    [messages, onApproval],
   );
 
   if (messages.length === 0) {
@@ -96,14 +115,32 @@ export function AiChatView({
     );
   }
 
+  // Use a type cast to avoid AutoSizer children type issues
+  const AutoSizerComponent = AutoSizer as any;
+
   return (
-    <Conversation>
-      <ConversationContent className="gap-5 p-3">
-        {messages.map((m) => (
-          <RenderedMessage key={m.id} message={m} onApproval={onApproval} />
-        ))}
+    <Conversation className="flex h-full flex-col overflow-hidden">
+      <div className="relative min-h-0 flex-1">
+        <AutoSizerComponent>
+          {({ height, width }: any) => (
+            <FixedSizeList
+              height={height}
+              itemCount={messages.length}
+              itemSize={140}
+              width={width}
+              outerRef={scrollRef}
+              innerRef={contentRef}
+              className="scrollbar-hide"
+            >
+              {Row}
+            </FixedSizeList>
+          )}
+        </AutoSizerComponent>
+      </div>
+
+      <div className="space-y-3 px-3 pb-3">
         {showSpinner && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 pt-2 text-xs text-muted-foreground">
             <Spinner />
             Thinking…
           </div>
@@ -123,7 +160,7 @@ export function AiChatView({
             </button>
           </div>
         )}
-      </ConversationContent>
+      </div>
       <ConversationScrollButton />
     </Conversation>
   );
@@ -138,7 +175,10 @@ const RenderedMessage = memo(function RenderedMessage({
 }) {
   if (message.role === "user") {
     const rawText = (message.parts || [])
-      .filter((p: UIMessagePart): p is Extract<UIMessagePart, { type: "text" }> => p.type === "text")
+      .filter(
+        (p: UIMessagePart): p is Extract<UIMessagePart, { type: "text" }> =>
+          p.type === "text",
+      )
       .map((p: Extract<UIMessagePart, { type: "text" }>) => p.text)
       .join("\n");
 

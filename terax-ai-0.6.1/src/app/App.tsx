@@ -25,7 +25,7 @@ import {
   type EditorPaneHandle,
 } from "@/modules/editor";
 import { FileExplorer } from "@/modules/explorer";
-import { GraphView } from "@/modules/graphify";
+const GraphView = lazy(() => import("@/modules/graphify").then(m => ({ default: m.GraphView })));
 import {
   Header,
   type SearchInlineHandle,
@@ -56,7 +56,7 @@ import { ThemeProvider } from "@/modules/theme";
 import { homeDir } from "@tauri-apps/api/path";
 import type { SearchAddon } from "@xterm/addon-search";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import type { PanelImperativeHandle } from "react-resizable-panels";
 
 function sameOrigin(a: string, b: string): boolean {
@@ -815,10 +815,16 @@ export default function App() {
                       aria-hidden={!isGraphTab}
                     >
                       {activeTab?.kind === "graph" && (
-                        <GraphView 
-                          projectRoot={activeTab.projectRoot} 
-                          onOpenFile={handleOpenFile}
-                        />
+                        <Suspense fallback={
+                          <div className="flex items-center justify-center h-full bg-[#0f172a]">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                          </div>
+                        }>
+                          <GraphView 
+                            projectRoot={activeTab.projectRoot} 
+                            onOpenFile={handleOpenFile}
+                          />
+                        </Suspense>
                       )}
                     </div>
                   </div>

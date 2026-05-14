@@ -29,6 +29,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 import { useEffect, useMemo } from "react";
+import { useShallow } from "zustand/shallow";
 import { getModel, getModelContextLimit } from "../config";
 import type { SessionMeta } from "../core/sessions";
 import { useAgentsStore } from "../store/agentsStore";
@@ -61,9 +62,13 @@ const SUGGESTIONS = [
 ];
 
 export function AiMiniWindow() {
-  const closeMini = useChatStore((s) => s.closeMini);
-  const sessionId = useChatStore((s) => s.activeSessionId);
-  const openPanel = useChatStore((s) => s.openPanel);
+  const { closeMini, sessionId, openPanel } = useChatStore(
+    useShallow((s) => ({
+      closeMini: s.closeMini,
+      sessionId: s.activeSessionId,
+      openPanel: s.openPanel,
+    })),
+  );
   const expandToPanel = () => {
     closeMini();
     openPanel();
@@ -122,8 +127,12 @@ function Body({
   onClose: () => void;
   onExpand: () => void;
 }) {
-  const focusInput = useChatStore((s) => s.focusInput);
-  const step = useChatStore((s) => s.agentMeta.step);
+  const { focusInput, step } = useChatStore(
+    useShallow((s) => ({
+      focusInput: s.focusInput,
+      step: s.agentMeta.step,
+    })),
+  );
 
   const chat = useMemo(() => getOrCreateChat(sessionId), [sessionId]);
   const helpers = useChat({ chat });

@@ -1,7 +1,7 @@
 mod modules;
 
-use modules::{fs, net, pty, secrets, shell, graphify, optimizer};
-use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
+use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core};
+use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_window_state::StateFlags;
 
 #[tauri::command]
@@ -64,6 +64,7 @@ pub fn run() {
         )
         .plugin(tauri_plugin_opener::init())
         .manage(pty::PtyState::default())
+        .manage(core::watcher::WatcherService::new())
         .invoke_handler(tauri::generate_handler![
                     pty::pty_open,
                     pty::pty_write,
@@ -97,6 +98,8 @@ pub fn run() {
                     net::http_ping,
                     graphify::commands::generate_project_graph,
                     optimizer::analyze_file_complexity,
+                    core::watcher::watch_project,
+                    core::watcher::unwatch_project,
                 ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
