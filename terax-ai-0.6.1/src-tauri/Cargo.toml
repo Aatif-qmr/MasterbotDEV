@@ -16,12 +16,16 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
+schemars = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 
 [dependencies]
 tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+schemars = "0.8"
 portable-pty = "0.9"
 dirs = "5"
 base64 = "0.22"
@@ -36,6 +40,7 @@ tauri-plugin-log = "2"
 tauri-plugin-os = "2"
 tauri-plugin-store = "2"
 tauri-plugin-process = "2"
+tauri-plugin-updater = "2"
 reqwest = { version = "0.12", default-features = false }
 tree-sitter = "0.20"
 tree-sitter-typescript = "0.20"

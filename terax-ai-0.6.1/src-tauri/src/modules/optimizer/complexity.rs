@@ -18,7 +18,7 @@ pub fn analyze_complexity(path: &str) -> Result<ComplexityMetrics, String> {
     
     let mut complexity = 1;
     let mut max_depth = 0;
-    let mut current_depth = 0;
+    let mut current_depth: usize = 0;
     let mut loc = 0;
 
     for line in content.lines() {

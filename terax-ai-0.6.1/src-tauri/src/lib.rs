@@ -1,82 +1,40 @@
 mod modules;
 
-use modules::{auth, fs, net, pty, secrets, shell};
+use modules::{fs, net, pty, secrets, shell, graphify, optimizer};
 use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_window_state::StateFlags;
 
 #[tauri::command]
-async fn open_settings_window(app: tauri::AppHandle, tab: Option<String>) -> Result<(), String> {
-    let url_path = match tab.as_deref() {
-        Some(t) if !t.is_empty() => format!("settings.html?tab={}", t),
-        _ => "settings.html".to_string(),
-    };
+async fn open_settings_window(app: tauri::AppHandle) -> Result<(), String> {
+    let window_label = "settings";
 
-    if let Some(window) = app.get_webview_window("settings") {
-        let _ = window.set_focus();
-        if let Some(t) = tab.as_deref().filter(|s| !s.is_empty()) {
-            // emit() serializes via JSON — no string-escape footgun, unlike
-            // eval() with format!(). Frontend listens via Tauri event API.
-            let _ = window.emit("terax:settings-tab", t);
-        }
+    if let Some(window) = app.get_webview_window(window_label) {
+        window.set_focus().map_err(|e| e.to_string())?;
         return Ok(());
     }
 
-    let mut builder = WebviewWindowBuilder::new(&app, "settings", WebviewUrl::App(url_path.into()))
+    WebviewWindowBuilder::new(&app, window_label, WebviewUrl::App("settings.html".into()))
         .title("Settings")
-        .inner_size(720.0, 520.0)
-        .min_inner_size(720.0, 520.0)
-        .max_inner_size(720.0, 520.0)
-        .resizable(false)
-        .visible(false)
-        // Keep settings above the main app window so it doesn't get hidden
-        // when the user clicks back into the editor or terminal (#33).
-        .always_on_top(true);
+        .inner_size(800.0, 600.0)
+        .center()
+        .resizable(true)
+        .build()
+        .map_err(|e| e.to_string())?;
 
-    // Tie lifecycle to the main window so settings minimizes/closes with it.
-    if let Some(main) = app.get_webview_window("main") {
-        builder = builder.parent(&main).map_err(|e| e.to_string())?;
-    }
-
-    #[cfg(target_os = "macos")]
-    let builder = builder
-        .title_bar_style(tauri::TitleBarStyle::Overlay)
-        .hidden_title(true);
-
-    // On Linux/Windows we render our own titlebar, so drop native chrome
-    // and make the window transparent.
-    #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let builder = builder.decorations(false).transparent(true);
-
-    let window = builder.build().map_err(|e| e.to_string())?;
-
-    // Some Linux compositors (GNOME/Mutter with CSD-by-default) ignore the
-    // builder-time decorations flag — re-assert it after realize.
-    #[cfg(target_os = "linux")]
-    {
-        let _ = window.set_decorations(false);
-    }
-    let _ = window;
     Ok(())
 }
 
-// WebKitGTK 2.46+ DMA-BUF renderer crashes with EGL_BAD_PARAMETER on
-// wlroots compositors (#105). GNOME/KDE work fine, so don't blanket-disable.
 #[cfg(target_os = "linux")]
 fn apply_wayland_webkit_workaround() {
-    if std::env::var_os("WEBKIT_DISABLE_DMABUF_RENDERER").is_some() {
-        return;
-    }
-    if std::env::var("XDG_SESSION_TYPE").as_deref() != Ok("wayland") {
-        return;
-    }
-    let desktop = std::env::var("XDG_CURRENT_DESKTOP")
-        .unwrap_or_default()
-        .to_lowercase();
-    let affected = [
-        "hyprland", "niri", "sway", "river", "wayfire", "labwc", "dwl",
-    ]
-    .iter()
-    .any(|c| desktop.contains(c));
+    let desktop = std::env::var("XDG_CURRENT_DESKTOP").unwrap_or_default();
+    let is_wayland = std::env::var("WAYLAND_DISPLAY").is_ok();
+    let affected = is_wayland
+        && (desktop.contains("Hyprland")
+            || desktop.contains("sway")
+            || desktop.contains("Wayfire")
+            || desktop.contains("River")
+            || desktop.contains("niri"));
+
     if !affected {
         return;
     }
@@ -91,7 +49,6 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_process::init())
-        // Auto-update disabled - updater plugin removed
         .plugin(
             tauri_plugin_window_state::Builder::new()
                 .with_state_flags(StateFlags::all() & !StateFlags::VISIBLE)
@@ -107,9 +64,7 @@ pub fn run() {
         )
         .plugin(tauri_plugin_opener::init())
         .manage(pty::PtyState::default())
-        use modules::{fs, net, pty, secrets, shell, graphify, optimizer};
-        // ...
-                .invoke_handler(tauri::generate_handler![
+        .invoke_handler(tauri::generate_handler![
                     pty::pty_open,
                     pty::pty_write,
                     pty::pty_resize,
@@ -144,8 +99,5 @@ pub fn run() {
                     optimizer::analyze_file_complexity,
                 ])
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
-}
-(tauri::generate_context!())
         .expect("error while running tauri application");
 }

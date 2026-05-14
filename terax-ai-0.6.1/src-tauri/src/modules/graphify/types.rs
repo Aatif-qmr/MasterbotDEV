@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum NodeType {
     File,
@@ -10,7 +11,7 @@ pub enum NodeType {
     Export,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum EdgeType {
     Import,
@@ -20,7 +21,7 @@ pub enum EdgeType {
     Calls,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GraphNode {
     pub id: String,
@@ -34,7 +35,7 @@ pub struct GraphNode {
     pub size: f32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GraphEdge {
     pub source: String,
@@ -44,7 +45,7 @@ pub struct GraphEdge {
     pub weight: f32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GraphMetadata {
     pub total_nodes: usize,
@@ -53,12 +54,41 @@ pub struct GraphMetadata {
     pub generated_at: u64,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GraphData {
     pub nodes: Vec<GraphNode>,
     pub edges: Vec<GraphEdge>,
     pub metadata: GraphMetadata,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct GraphModuleSchema {
+    pub data: GraphData,
+    pub viewport: ViewportState,
+    pub interaction: InteractionState,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ViewportState {
+    pub zoom: f64,
+    pub pan: Point,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct Point {
+    pub x: f64,
+    pub y: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct InteractionState {
+    pub selected_node_id: Option<String>,
+    pub hovered_node_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

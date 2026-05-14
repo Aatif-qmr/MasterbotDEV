@@ -4,6 +4,11 @@ import { lintGutter } from "@codemirror/lint";
 import { search } from "@codemirror/search";
 import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
+import { 
+  inlineEditField, 
+  inlineEditCleanupFilter, 
+  inlineEditTheme 
+} from "./extensions/inlineEdit";
 
 // Compartments allow runtime reconfiguration without rebuilding state.
 export const languageCompartment = new Compartment();
@@ -21,6 +26,9 @@ export function buildSharedExtensions(): Extension[] {
     EditorState.tabSize.of(2),
     search({ top: true }),
     lintGutter(),
+    inlineEditField,
+    inlineEditCleanupFilter,
+    inlineEditTheme,
     EditorView.theme({
       "&, &.cm-editor, &.cm-editor.cm-focused": {
         backgroundColor: "transparent !important",

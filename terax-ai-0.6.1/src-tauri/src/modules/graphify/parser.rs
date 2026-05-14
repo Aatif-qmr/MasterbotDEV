@@ -1,5 +1,5 @@
 use tree_sitter::{Parser, Node};
-use tree_sitter_typescript::TYPESCRIPT;
+use tree_sitter_typescript::language_typescript;
 use walkdir::WalkDir;
 use crate::modules::graphify::types::{FileDependencies, Dependency, ParsedFile};
 
@@ -10,7 +10,7 @@ pub struct DependencyParser {
 impl DependencyParser {
     pub fn new() -> Self {
         let mut parser = Parser::new();
-        parser.set_language(&TYPESCRIPT.into()).expect("Failed to load TS grammar");
+        parser.set_language(language_typescript().into()).expect("Failed to load TS grammar");
         Self { parser }
     }
 
