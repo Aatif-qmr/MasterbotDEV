@@ -22,6 +22,7 @@ import { runStorageMigration } from "../storage/migrator";
 import { GeminiSession, createTeraxGeminiAgent } from "../engine/session";
 import { GeminiEventType } from "../engine/gemini_types";
 import type { UIMessage, UIMessagePart, ChatStatus, TeraxToolCall } from "../engine/types";
+import { timeTravelService } from "@/modules/core/time_travel/service";
 
 export type { UIMessage, UIMessagePart, ChatStatus, TeraxToolCall };
 
@@ -244,6 +245,7 @@ type StoreState = {
   deleteSession: (id: string) => void;
   renameSession: (id: string, title: string) => void;
   persistMessages: (id: string, messages: UIMessage[]) => void;
+  loadState: (state: any) => void;
 };
 
 const NOOP_LIVE: Live = {
@@ -430,6 +432,29 @@ export const useChatStore = create<StoreState>((set, get) => ({
     });
   },
 
+  loadState: (state: any) => {
+    const { sessions, activeSessionId, activeChatMessages } = state;
+    
+    // Stop current chats
+    chats.forEach(c => c.stop());
+    chats.clear();
+    
+    if (activeSessionId && activeChatMessages) {
+      seedMessages.set(activeSessionId, activeChatMessages);
+    }
+    
+    set({
+      sessions,
+      activeSessionId,
+      agentMeta: IDLE_META,
+    });
+    
+    if (activeSessionId) {
+      void saveActiveId(activeSessionId);
+    }
+    void saveSessionsList(sessions);
+  },
+
   newSession: () => {
     const id = newSessionId();
     const meta: SessionMeta = {
@@ -442,6 +467,10 @@ export const useChatStore = create<StoreState>((set, get) => ({
     set({ sessions: next, activeSessionId: id, agentMeta: IDLE_META });
     void saveSessionsList(next);
     void saveActiveId(id);
+    
+    // Initial snapshot for new session
+    void timeTravelService.createSnapshot("Initial State: New Session");
+    
     return id;
   },
 
@@ -562,6 +591,16 @@ export function getChat(sessionId?: string): Chat | undefined {
   if (sessionId) return chats.get(sessionId);
   const id = useChatStore.getState().activeSessionId;
   return id ? chats.get(id) : undefined;
+}
+
+export function getFullChatState() {
+  const state = useChatStore.getState();
+  const activeChat = getChat();
+  return {
+    sessions: state.sessions,
+    activeSessionId: state.activeSessionId,
+    activeChatMessages: activeChat?.messages ?? []
+  };
 }
 
 export async function sendMessage(text: string): Promise<boolean> {

@@ -52,6 +52,7 @@ import {
   type TeraxOpenInput,
 } from "@/modules/terminal";
 import { ThemeProvider } from "@/modules/theme";
+import { timeTravelService } from "@/modules/core/time_travel/service";
 // Auto-update disabled - UpdaterDialog removed
 import { homeDir } from "@tauri-apps/api/path";
 import type { SearchAddon } from "@xterm/addon-search";
@@ -182,6 +183,13 @@ export default function App() {
     void hydrateSessions();
     void useAgentsStore.getState().hydrate();
     void useSnippetsStore.getState().hydrate();
+
+    // Periodic auto-snapshot every 5 mins
+    const interval = setInterval(() => {
+      void timeTravelService.createSnapshot("Auto Snapshot");
+    }, 1000 * 60 * 5);
+    
+    return () => clearInterval(interval);
   }, [hydrateSessions]);
 
   const activeTab = tabs.find((t) => t.id === activeId);

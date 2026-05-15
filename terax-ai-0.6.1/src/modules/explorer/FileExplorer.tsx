@@ -26,6 +26,7 @@ import { copyToClipboard, revealInFinder } from "./core/contextActions";
 import { fileIconUrl, folderIconUrl } from "./core/iconResolver";
 import { COMPACT_CONTENT, COMPACT_ITEM } from "./core/menuItemClass";
 import { useFileTree } from "./core/useFileTree";
+import { TimeTravelSlider } from "../core/ui/TimeTravelSlider";
 
 type SearchHit = {
   path: string;
@@ -449,6 +450,9 @@ export function FileExplorer({
           </ContextMenuContent>
         </ContextMenu>
       )}
+      <div className="mt-auto px-2 py-4 border-t border-border/40">
+        <TimeTravelSlider />
+      </div>
     </div>
   );
 }

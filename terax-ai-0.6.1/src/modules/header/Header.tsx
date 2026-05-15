@@ -31,6 +31,7 @@ import {
   type SearchInlineHandle,
   type SearchTarget,
 } from "./SearchInline";
+import { UndoButton } from "@/modules/core/ui/UndoButton";
 
 type Props = {
   tabs: Tab[];
@@ -228,6 +229,8 @@ export function Header({
       </div>
 
       <SearchInline ref={searchRef} target={searchTarget} compact={compact} />
+
+      <UndoButton />
 
       {IS_MAC && (
         <>

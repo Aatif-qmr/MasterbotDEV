@@ -12,6 +12,7 @@ interface EditorState {
   proposeEdit: (filePath: string, range: { from: number; to: number }, suggestion: string, originalText: string) => string;
   applyEdit: (filePath: string, editId: string, accept: boolean) => void;
   clearEdits: (filePath: string) => void;
+  loadState: (state: any) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -103,5 +104,10 @@ export const useEditorStore = create<EditorState>((set) => ({
     const newEdits = { ...state.activeEdits };
     delete newEdits[filePath];
     return { activeEdits: newEdits };
+  }),
+
+  loadState: (state) => set({
+    layout: state.layout,
+    activeEdits: state.activeEdits
   })
 }));

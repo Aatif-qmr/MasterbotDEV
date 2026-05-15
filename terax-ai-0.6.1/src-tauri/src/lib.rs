@@ -1,6 +1,6 @@
 mod modules;
 
-use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, auth, storage};
+use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, auth, storage, time_travel};
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_window_state::StateFlags;
 
@@ -114,6 +114,10 @@ pub fn run() {
                     storage::commands::storage_get_history,
                     storage::commands::storage_clear_project,
                     storage::commands::storage_migrate_from_localstorage,
+                    time_travel::commands::tt_create_snapshot,
+                    time_travel::commands::tt_restore_snapshot,
+                    time_travel::commands::tt_get_timeline,
+                    time_travel::commands::tt_clear_history,
                 ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
