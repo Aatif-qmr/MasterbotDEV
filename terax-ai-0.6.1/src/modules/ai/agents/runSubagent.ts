@@ -1,22 +1,15 @@
-const Agent = class { constructor(public config: unknown) {} };
-const stepCountIs = (_count: number) => (_step: unknown) => false;
 import { DEFAULT_MODEL_ID, getModel, type ModelId } from "../config";
-import { buildLanguageModel } from "../agents/agent";
-import type { ProviderKeys } from "../engine/keyring";
+import { createTeraxGeminiAgent, type GeminiAgent, type GeminiSession } from "../engine/session";
 import type { ToolContext } from "../bridge/tools/context";
 import { buildFsTools } from "../bridge/tools/fs";
 import { buildSearchTools } from "../bridge/tools/search";
 import { SUBAGENTS, type SubagentType } from "./subagents";
 
-const SUBAGENT_MAX_STEPS = 12;
-
 type Args = {
   type: SubagentType;
   prompt: string;
-  keys: ProviderKeys;
   modelId: ModelId;
   toolContext: ToolContext;
-  lmstudioBaseURL?: string;
 };
 
 type RunResult = {
@@ -28,72 +21,50 @@ type RunResult = {
 export async function runSubagent({
   type,
   prompt,
-  keys,
   modelId,
   toolContext,
-  lmstudioBaseURL,
 }: Args): Promise<RunResult> {
   const def = SUBAGENTS[type];
   if (!def) throw new Error(`unknown subagent type: ${type}`);
 
   // Subagents only get read-only tools. Build directly from the read-only
   // builders to avoid pulling in mutating/recursive tools.
-  const readOnly: Record<string, unknown> = {
+  const readOnly: Record<string, any> = {
     ...buildFsTools(toolContext),
     ...buildSearchTools(toolContext),
   };
-  const filtered: Record<string, unknown> = {};
+  const filteredTools: any[] = [];
   for (const t of def.tools) {
-    if (t in readOnly) filtered[t] = readOnly[t];
-  }
-
-  const model = await buildLanguageModel(getModel(modelId).provider, keys, getModel(modelId).id, {
-    lmstudioBaseURL,
-  });
-
-  // The Agent constructor's tools generic infers `never` when passed a
-  // dynamic record, so cast through unknown for both `tools` and
-  // `stopWhen` (whose StopCondition is parameterized by the same generic).
-  const agent = new Agent({
-    model,
-    instructions: def.systemPrompt,
-    tools: filtered,
-    stopWhen: stepCountIs(SUBAGENT_MAX_STEPS) as never,
-  } as never);
-
-  const start = Date.now();
-  const result = await (agent as unknown as {
-    generate: (a: { prompt: string }) => Promise<unknown>;
-  }).generate({ prompt });
-  const durationMs = Date.now() - start;
-
-  // Best-effort summary extraction across SDK shape variations.
-  const r = result as unknown as {
-    text?: string;
-    response?: { messages?: { content?: unknown }[] };
-    steps?: unknown[];
-  };
-  const summary = r.text ?? extractText(r) ?? "(no output)";
-  const stepCount = Array.isArray(r.steps) ? r.steps.length : 0;
-
-  return { summary, stepCount, durationMs };
-}
-
-function extractText(r: {
-  response?: { messages?: { content?: unknown }[] };
-}): string | null {
-  const msgs = r.response?.messages;
-  if (!Array.isArray(msgs)) return null;
-  const parts: string[] = [];
-  for (const m of msgs) {
-    if (typeof m.content === "string") parts.push(m.content);
-    else if (Array.isArray(m.content)) {
-      for (const p of m.content as { type?: string; text?: string }[]) {
-        if (p.type === "text" && typeof p.text === "string") parts.push(p.text);
-      }
+    if (t in readOnly) {
+        // Map to Tool interface
+        filteredTools.push({
+            name: t,
+            description: (readOnly[t] as any).description,
+            inputSchema: (readOnly[t] as any).inputSchema,
+            action: (readOnly[t] as any).execute
+        });
     }
   }
-  return parts.join("\n").trim() || null;
+
+  const agent: GeminiAgent = createTeraxGeminiAgent({
+    model: getModel(modelId).id,
+    instructions: def.systemPrompt,
+    tools: filteredTools,
+    skillsEnabled: false,
+  });
+
+  const start = Date.now();
+  const session: GeminiSession = await agent.session(`subagent-${Date.now()}`);
+  await session.initialize();
+  
+  const result = await session.generate(prompt);
+  const durationMs = Date.now() - start;
+
+  // Since generate() returns UIMessagePart[], we extract text from them
+  const summary = result.text || "(no output)";
+  const stepCount = result.parts.filter(p => p.type === 'tool-invocation').length;
+
+  return { summary, stepCount, durationMs };
 }
 
 export const DEFAULT_SUBAGENT_MODEL: ModelId = DEFAULT_MODEL_ID;

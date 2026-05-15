@@ -7,15 +7,17 @@
 
 import { GoogleGenAI, type Content, type Part } from '@google/genai';
 import { auth } from './auth';
-import type {
+import {
   GeminiAgentOptions,
   SessionContext,
   TypedGeminiStreamEvent,
   Tool,
   SkillReference,
   SystemInstructions,
+  UIMessagePart,
+  ToolCallRequestEvent,
+  GeminiEventType,
 } from './gemini_types';
-import { GeminiEventType } from './gemini_types';
 import type { GeminiStreamChunk } from './types';
 import { GEMINI_SYSTEM_PROMPT } from './native';
 import { useChatStore } from '../store/chatStore';
@@ -305,7 +307,7 @@ export class GeminiSession {
                 name: call.name,
                 args: call.args,
               },
-            };
+            } as ToolCallRequestEvent;
             
             const toolFunc = builtInTools[call.name as keyof ChatTools];
             if (toolFunc) {
@@ -341,6 +343,35 @@ export class GeminiSession {
 
   getHistory(): readonly Content[] {
     return [...this.history];
+  }
+
+  /**
+   * Run a generation to completion and return the result
+   */
+  async generate(
+    prompt: string,
+    signal?: AbortSignal,
+  ): Promise<{ text: string; parts: UIMessagePart[] }> {
+    let text = "";
+    const parts: UIMessagePart[] = [];
+
+    for await (const event of this.sendStream(prompt, signal)) {
+      if (event.type === GeminiEventType.Content) {
+        text += event.value as string;
+        parts.push({ type: "text", text: event.value as string });
+      } else if (event.type === GeminiEventType.ToolCallRequest) {
+        const value = (event as ToolCallRequestEvent).value;
+        parts.push({
+          type: "tool-invocation",
+          toolCallId: value.callId,
+          toolName: value.name,
+          args: value.args,
+          state: "call",
+        });
+      }
+    }
+
+    return { text, parts };
   }
 
   clearHistory(): void {

@@ -29,12 +29,11 @@ Auto-executes (no approval) — subagents are read-only by design.`,
           .describe("Short label shown in the chat UI for the spawn card."),
       }),
       execute: async ({ type, prompt, description }) => {
-        const { apiKeys, selectedModelId } = useChatStore.getState();
+        const { selectedModelId } = useChatStore.getState();
         try {
           const r = await runSubagent({
             type,
             prompt,
-            keys: apiKeys,
             modelId: selectedModelId,
             toolContext: ctx,
           });

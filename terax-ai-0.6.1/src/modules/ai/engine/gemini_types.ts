@@ -5,6 +5,8 @@
  * seamless integration without requiring the full SDK as a dependency.
  */
 
+import type { UIMessagePart } from './types';
+
 /**
  * Filesystem interface that Gemini CLI expects
  */
@@ -69,12 +71,13 @@ export interface SessionContext {
  * Forward declarations for circular reference resolution
  */
 export interface GeminiAgent {
-  // Placeholder - will be implemented by the actual agent
+  session(sessionId?: string): Promise<GeminiSession>;
 }
 
 export interface GeminiSession {
   id: string;
-  sendStream(prompt: string, signal?: AbortSignal): AsyncGenerator<GeminiStreamEvent>;
+  sendStream(prompt: string, signal?: AbortSignal): AsyncGenerator<TypedGeminiStreamEvent>;
+  generate(prompt: string, signal?: AbortSignal): Promise<{ text: string; parts: UIMessagePart[] }>;
   initialize(): Promise<void>;
 }
 
@@ -183,3 +186,5 @@ export type TypedGeminiStreamEvent =
   | ContentEvent 
   | ToolCallRequestEvent 
   | GeminiStreamEvent;
+
+export type { UIMessagePart };

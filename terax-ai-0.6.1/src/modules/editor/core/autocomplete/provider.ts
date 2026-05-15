@@ -1,11 +1,8 @@
 import {
   DEFAULT_AUTOCOMPLETE_MODEL,
-  LMSTUDIO_DEFAULT_BASE_URL,
   type AutocompleteProviderId,
 } from "@/modules/ai/config";
-import { buildLanguageModel } from "@/modules/ai/agents/agent";
-import { EMPTY_PROVIDER_KEYS } from "@/modules/ai/engine/keyring";
-const generateText = async (..._args: unknown[]) => ({ text: '' });
+import { createTeraxGeminiAgent } from "@/modules/ai/engine/session";
 import {
   buildUserPrompt,
   COMPLETION_SYSTEM_PROMPT,
@@ -20,12 +17,6 @@ export type CompletionDeps = {
   lmstudioBaseURL: string;
 };
 
-const MAX_OUTPUT_TOKENS_DEFAULT = 128;
-// Reasoning models burn output tokens on internal thought before producing
-// any visible content; with a tight cap they finish_reason="length" with
-// empty text. The trim step still caps visible output at MAX_LINES.
-const MAX_OUTPUT_TOKENS_REASONING = 1024;
-
 export async function requestCompletion(
   req: CompletionRequest,
   deps: CompletionDeps,
@@ -33,34 +24,20 @@ export async function requestCompletion(
 ): Promise<string> {
   const modelId =
     deps.modelId.trim() || DEFAULT_AUTOCOMPLETE_MODEL[deps.provider];
-  const keys = { ...EMPTY_PROVIDER_KEYS, [deps.provider]: deps.apiKey };
-  const model = await buildLanguageModel(deps.provider, keys, modelId, {
-    lmstudioBaseURL: deps.lmstudioBaseURL || LMSTUDIO_DEFAULT_BASE_URL,
+  
+  const agent = createTeraxGeminiAgent({
+    model: modelId,
+    instructions: COMPLETION_SYSTEM_PROMPT,
+    skillsEnabled: false,
   });
 
-  const isReasoning = /\bgpt-oss\b/i.test(modelId);
-  const providerOptions = isReasoning
-    ? {
-        cerebras: { reasoningEffort: "low" },
-        groq: { reasoningEffort: "low" },
-        openai: { reasoningEffort: "low" },
-      }
-    : undefined;
+  const session = await agent.session(`autocomplete-${Date.now()}`);
+  await session.initialize();
 
-  const { text } = await generateText({
-    model,
-    system: COMPLETION_SYSTEM_PROMPT,
-    prompt: buildUserPrompt(req),
-    maxOutputTokens: isReasoning
-      ? MAX_OUTPUT_TOKENS_REASONING
-      : MAX_OUTPUT_TOKENS_DEFAULT,
-    maxRetries: 0,
-    abortSignal: signal,
-    temperature: 0.2,
-    ...(providerOptions ? { providerOptions } : {}),
-  });
+  const prompt = buildUserPrompt(req);
+  const result = await session.generate(prompt, signal);
 
-  return cleanCompletion(text);
+  return cleanCompletion(result.text);
 }
 
 function cleanCompletion(raw: string): string {

@@ -5,7 +5,7 @@
  * making Gemini the sole AI agent with full control over Terax.
  */
 
-import type { SessionContext, AgentFilesystem, AgentShell } from './types';
+import type { SessionContext, AgentFilesystem, AgentShell } from './gemini_types';
 import { native } from '../bridge/native';
 import type { CommandOutput } from '../bridge/native';
 

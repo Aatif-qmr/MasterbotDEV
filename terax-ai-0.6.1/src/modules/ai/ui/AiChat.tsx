@@ -52,8 +52,7 @@ function CommandSnippet({ name }: { name: string }) {
   );
 }
 
-type AnyToolPart = any;
-type AnyPart = any;
+type AnyToolPart = Extract<UIMessagePart, { type: "tool-invocation" }>;
 
 type ApprovalArg = {
   id: string;
@@ -201,13 +200,13 @@ const RenderedMessage = memo(function RenderedMessage({
   const role = message.role === "data" ? "system" : message.role;
 
   return (
-    <Message from={role as any}>
+    <Message from={role as "user" | "assistant" | "system"}>
       <MessageContent>
         <div className="flex flex-col gap-3">
           {(message.parts || []).map((part: UIMessagePart, i: number) => (
             <RenderedPart
               key={`${message.id}-${i}`}
-              part={part as AnyPart}
+              part={part}
               onApproval={onApproval}
             />
           ))}
@@ -221,13 +220,13 @@ const RenderedPart = memo(function RenderedPart({
   part,
   onApproval,
 }: {
-  part: AnyPart;
+  part: UIMessagePart;
   onApproval: (id: string, approved: boolean) => void;
 }) {
   if (part.type === "text") {
     return (
       <MessageResponse>
-        {(part as unknown as { text: string }).text}
+        {part.text}
       </MessageResponse>
     );
   }
@@ -237,19 +236,16 @@ const RenderedPart = memo(function RenderedPart({
       <Reasoning>
         <ReasoningTrigger />
         <ReasoningContent>
-          {(part as unknown as { text: string }).text}
+          {part.text}
         </ReasoningContent>
       </Reasoning>
     );
   }
 
-  if (
-    part.type === "dynamic-tool" ||
-    (typeof part.type === "string" && part.type.startsWith("tool-"))
-  ) {
+  if (part.type === "tool-invocation") {
     return (
       <RenderedTool
-        part={part as unknown as AnyToolPart}
+        part={part}
         onApproval={onApproval}
       />
     );
@@ -265,17 +261,18 @@ const RenderedTool = memo(function RenderedTool({
   part: AnyToolPart;
   onApproval: (id: string, approved: boolean) => void;
 }) {
-  const toolName =
-    part.type === "dynamic-tool"
-      ? part.toolName
-      : part.type.replace(/^tool-/, "");
+  const toolName = part.toolName;
 
-  if (part.state === "approval-requested") {
+  // In our new architecture, we don't have 'approval-requested' state in the part itself
+  // yet, but let's keep the UI compatible if we add it.
+  // Currently, tool-invocation has state: "call" | "result"
+  
+  if ((part as any).state === "approval-requested") {
     return (
       <AiToolApproval
         part={part as any}
         toolName={toolName}
-        onRespond={(approved) => onApproval(part.approval.id, approved)}
+        onRespond={(approved) => onApproval((part as any).approval.id, approved)}
       />
     );
   }
@@ -283,10 +280,10 @@ const RenderedTool = memo(function RenderedTool({
   return (
     <Tool
       toolName={toolName}
-      state={part.state}
-      input={part.input}
-      output={"output" in part ? part.output : undefined}
-      errorText={"errorText" in part ? part.errorText : undefined}
+      state={part.state as any}
+      input={part.args}
+      output={"result" in part ? part.result : undefined}
+      errorText={undefined} // Error handling in tools would populate this
     />
   );
 });
