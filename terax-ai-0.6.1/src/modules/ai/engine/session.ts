@@ -6,7 +6,6 @@
  */
 
 import { GoogleGenAI, type Content, type Part } from '@google/genai';
-import { auth } from './auth';
 import {
   GeminiAgentOptions,
   SessionContext,
@@ -40,6 +39,24 @@ export function createSessionId(): string {
   return `${timestamp}-${randomPart}`;
 }
 
+async function getBootstrapToken(): Promise<string | null> {
+  try {
+    const configDir = await native.runCommand('echo $HOME', null, 5);
+    const home = configDir.stdout?.trim() || '';
+    if (!home) return null;
+    
+    const tokenPath = `${home}/.ccliconfig/auth.json`;
+    const content = await native.readFile(tokenPath);
+    if (content.kind === 'text') {
+      const data = JSON.parse(content.content);
+      return data.access_token;
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
 /**
  * Gemini Agent class - the main entry point for creating sessions
  */
@@ -54,12 +71,12 @@ export class GeminiAgent {
   private async getClient(): Promise<GoogleGenAI> {
     if (this.client) return this.client;
     
-    const token = await auth.getToken();
+    const token = await getBootstrapToken();
     if (!token) {
-      throw new Error('NOT_LOGGED_IN');
+      throw new Error('NOT_LOGGED_IN: Please run "ccli login" to authenticate.');
     }
 
-    this.client = new GoogleGenAI({ apiKey: token.access_token as string });
+    this.client = new GoogleGenAI({ apiKey: token });
     return this.client;
   }
 

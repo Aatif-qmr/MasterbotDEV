@@ -1,16 +1,31 @@
-use crate::modules::auth::commands::oauth_get_token;
 use crate::modules::autocomplete::types::{AutocompleteContext, SuggestionResult};
 use serde_json::json;
 use tauri::{AppHandle, Manager};
+use std::fs;
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct AuthToken {
+    access_token: String,
+}
+
+fn load_token_from_file() -> Result<String, String> {
+    let file_path = dirs::home_dir()
+        .ok_or("Could not find home directory")?
+        .join(".ccliconfig")
+        .join("auth.json");
+    let json = fs::read_to_string(file_path).map_err(|e| e.to_string())?;
+    let token: AuthToken = serde_json::from_str(&json).map_err(|e| e.to_string())?;
+    Ok(token.access_token)
+}
 
 #[tauri::command]
 pub async fn ac_get_suggestion(
     app: AppHandle,
     context: AutocompleteContext,
 ) -> Result<SuggestionResult, String> {
-    // 1. Get OAuth token
-    let token = oauth_get_token(app.state()).await?
-        .ok_or("Not logged in")?;
+    // 1. Get OAuth token from CCli
+    let token_string = load_token_from_file()?;
 
     // 2. Construct optimized prompt
     let mut prompt = format!(
@@ -34,7 +49,7 @@ pub async fn ac_get_suggestion(
     let client = reqwest::Client::new();
     let response = client
         .post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent")
-        .query(&[("key", &token.access_token)])
+        .query(&[("key", &token_string)])
         .json(&json!({
             "contents": [{
                 "parts": [{

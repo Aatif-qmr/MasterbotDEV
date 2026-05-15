@@ -1,6 +1,6 @@
 mod modules;
 
-use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, auth, storage, time_travel, context, autocomplete};
+use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, storage, time_travel, context, autocomplete};
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_window_state::StateFlags;
 
@@ -107,10 +107,6 @@ pub fn run() {
                     optimizer::analyze_file_complexity,
                     core::watcher::watch_project,
                     core::watcher::unwatch_project,
-                    auth::commands::oauth_start_flow,
-                    auth::commands::oauth_handle_callback,
-                    auth::commands::oauth_get_token,
-                    auth::commands::oauth_clear,
                     storage::commands::storage_get_context,
                     storage::commands::storage_save_message,
                     storage::commands::storage_get_history,
