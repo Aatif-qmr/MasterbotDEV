@@ -1,6 +1,6 @@
 mod modules;
 
-use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, auth, storage, time_travel};
+use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, auth, storage, time_travel, context};
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_window_state::StateFlags;
 
@@ -118,6 +118,11 @@ pub fn run() {
                     time_travel::commands::tt_restore_snapshot,
                     time_travel::commands::tt_get_timeline,
                     time_travel::commands::tt_clear_history,
+                    context::commands::ctx_index_project,
+                    context::commands::ctx_update_files,
+                    context::commands::ctx_search,
+                    context::commands::ctx_get_file_context,
+                    context::commands::ctx_get_project_summary,
                 ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

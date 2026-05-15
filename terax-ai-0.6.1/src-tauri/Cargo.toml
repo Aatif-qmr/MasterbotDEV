@@ -60,6 +60,9 @@ chrono = { version = "0.4.44", features = ["serde"] }
 tauri-plugin-fs = "2.5.1"
 zstd = "0.13.3"
 uuid = { version = "1.23.1", features = ["v4"] }
+sqlite-vec = "0.1.9"
+rayon = "1.12.0"
+sha2 = "0.11.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 keyring = { version = "3.6", default-features = false, features = [

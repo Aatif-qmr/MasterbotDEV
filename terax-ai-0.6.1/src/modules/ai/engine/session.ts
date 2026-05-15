@@ -21,6 +21,7 @@ import { GEMINI_SYSTEM_PROMPT } from './native';
 import { useChatStore } from '../store/chatStore';
 import { native } from '../bridge/native';
 import { buildTools, type ChatTools } from '../bridge/tools/tools';
+import { contextService } from '../context/service';
 
 interface Skill {
   name: string;
@@ -218,8 +219,18 @@ export class GeminiSession {
 
     const state = useChatStore.getState();
     const modelId = this.options.model ?? state.selectedModelId;
-    const systemInstructions = await this.resolveInstructions();
+    let systemInstructions = await this.resolveInstructions();
     const context = this.createContext();
+
+    // Inject semantic project context
+    try {
+        const contextBlock = await contextService.buildContextBlock(prompt);
+        if (contextBlock) {
+            systemInstructions += contextBlock;
+        }
+    } catch (err) {
+        console.error('Failed to inject project context:', err);
+    }
 
     // Prepare built-in tools
     const toolContext = {
