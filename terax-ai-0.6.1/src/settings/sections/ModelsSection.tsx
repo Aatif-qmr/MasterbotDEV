@@ -45,7 +45,11 @@ export function ModelsSection() {
   const defaultModel = usePreferencesStore((s) => s.defaultModelId);
 
   useEffect(() => {
-    void getAllKeys().then(setKeys);
+    void getAllKeys().then((allKeys) => {
+      // Filter out keys for providers that are no longer in our core ProviderId union
+      // This is a runtime guard to handle old keychain entries
+      setKeys(allKeys as KeysMap);
+    });
   }, []);
 
   const onSave = async (provider: ProviderId, value: string) => {
@@ -73,7 +77,7 @@ export function ModelsSection() {
     <div className="flex flex-col gap-7">
       <SectionHeader
         title="Models"
-        description="Bring your own keys. They live in your OS keychain and are used only by Terax."
+        description="Terax is Gemini-First. Configure your Gemini models or connect a local LM Studio server."
       />
 
       <div className="flex flex-col gap-2">
@@ -210,7 +214,7 @@ function AutocompleteBlock({ keys }: { keys: KeysMap }) {
           <Label>Editor autocomplete</Label>
           <span className="text-[10.5px] leading-relaxed text-muted-foreground">
             Inline ghost-text suggestions in the code editor. Powered by
-            ultra-fast inference (Cerebras / Groq) or a local LM Studio server.
+            a local LM Studio server (Project context awareness enabled).
           </span>
         </div>
         <Switch

@@ -14,14 +14,8 @@ import {
   Add01Icon,
   ArrowDown01Icon,
   ArrowUpIcon,
-  ChatGptIcon,
-  ClaudeIcon,
   ComputerIcon,
-  CpuIcon,
-  DeepseekIcon,
-  FlashIcon,
   GoogleGeminiIcon,
-  Grok02Icon,
   Message01Icon,
   Mic01Icon,
   StopCircleIcon,
@@ -41,15 +35,9 @@ import { ACCEPTED_FILES, useComposer } from "../ui/composer";
 import { useChatStore } from "../store/chatStore";
 
 const PROVIDER_ICON = {
-  openai: ChatGptIcon,
-  anthropic: ClaudeIcon,
   google: GoogleGeminiIcon,
-  xai: Grok02Icon,
-  cerebras: CpuIcon,
-  groq: FlashIcon,
-  deepseek: DeepseekIcon,
   lmstudio: ComputerIcon,
-} as const satisfies Record<ProviderId, typeof ChatGptIcon>;
+} as const satisfies Record<ProviderId, any>;
 
 export function AiOpenButton({ onOpen }: { onOpen: () => void }) {
   return (
@@ -79,19 +67,6 @@ export function AiStatusBarControls() {
 
   return (
     <div className="flex items-center gap-0.5">
-      {/* <Button
-        onClick={closePanel}
-        title="Close AI panel"
-        size="xs"
-        variant="outline"
-        aria-label="Close AI panel"
-        className="text-[11px] text-foreground/85 pl-1.5"
-      > */}
-      {/* <Kbd className="h-4 gap-px text-[11px]">
-          ⌘<span className="font-mono">I</span>
-        </Kbd> */}
-      {/* Close */}
-      {/* </Button> */}
       <input
         ref={fileInputRef}
         type="file"
@@ -156,7 +131,6 @@ export function AiStatusBarControls() {
         <Kbd className="h-4 gap-px px-2 font-mono text-[11px]">
           {fmtShortcut(MOD_KEY, "I")}
         </Kbd>
-        {/* <HugeiconsIcon icon={Close} size={15} strokeWidth={1.75} /> */}
       </Button>
       <IconBtn
         title={miniOpen ? "Mini-window open" : "Open conversation"}
@@ -203,7 +177,7 @@ function ModelDropdown() {
   const currentProviderHasKey = !!apiKeys[current.provider];
 
   const onPick = (id: ModelId, providerId: ProviderId) => {
-    if (!apiKeys[providerId]) {
+    if (providerNeedsKey(providerId) && !apiKeys[providerId]) {
       void openSettingsWindow("models");
       return;
     }
@@ -229,11 +203,6 @@ function ModelDropdown() {
               : `${current.label} — no key configured`
           }
         >
-          {/* <HugeiconsIcon
-            icon={PROVIDER_ICON[current.provider]}
-            size={12}
-            strokeWidth={1.25}
-          /> */}
           {current.label}
           <HugeiconsIcon
             icon={ArrowDown01Icon}
@@ -251,7 +220,7 @@ function ModelDropdown() {
             <div key={p.id} className="px-1 pt-1.5 first:pt-1">
               <div className="mb-0.5 flex items-center gap-1.5 px-2 text-[9.5px] font-medium tracking-wide text-muted-foreground uppercase">
                 <HugeiconsIcon
-                  icon={PROVIDER_ICON[p.id]}
+                  icon={PROVIDER_ICON[p.id as keyof typeof PROVIDER_ICON]}
                   size={15}
                   strokeWidth={1.25}
                 />

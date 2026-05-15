@@ -1,14 +1,6 @@
 export const KEYRING_SERVICE = "terax-ai";
 
-export type ProviderId =
-  | "openai"
-  | "anthropic"
-  | "google"
-  | "xai"
-  | "cerebras"
-  | "groq"
-  | "deepseek"
-  | "lmstudio";
+export type ProviderId = "google" | "lmstudio";
 
 export type ProviderInfo = {
   id: ProviderId;
@@ -20,53 +12,11 @@ export type ProviderInfo = {
 
 export const PROVIDERS: readonly ProviderInfo[] = [
   {
-    id: "openai",
-    label: "OpenAI",
-    keyringAccount: "openai-api-key",
-    keyPrefix: "sk-",
-    consoleUrl: "https://platform.openai.com/api-keys",
-  },
-  {
-    id: "anthropic",
-    label: "Anthropic",
-    keyringAccount: "anthropic-api-key",
-    keyPrefix: "sk-ant-",
-    consoleUrl: "https://console.anthropic.com/settings/keys",
-  },
-  {
     id: "google",
     label: "Google",
     keyringAccount: "google-api-key",
     keyPrefix: null,
     consoleUrl: "https://aistudio.google.com/apikey",
-  },
-  {
-    id: "xai",
-    label: "xAI",
-    keyringAccount: "xai-api-key",
-    keyPrefix: "xai-",
-    consoleUrl: "https://console.x.ai/",
-  },
-  {
-    id: "cerebras",
-    label: "Cerebras",
-    keyringAccount: "cerebras-api-key",
-    keyPrefix: "csk-",
-    consoleUrl: "https://cloud.cerebras.ai/",
-  },
-  {
-    id: "groq",
-    label: "Groq",
-    keyringAccount: "groq-api-key",
-    keyPrefix: "gsk_",
-    consoleUrl: "https://console.groq.com/keys",
-  },
-  {
-    id: "deepseek",
-    label: "DeepSeek",
-    keyringAccount: "deepseek-api-key",
-    keyPrefix: "sk-",
-    consoleUrl: "https://platform.deepseek.com/api_keys",
   },
   {
     id: "lmstudio",
@@ -91,44 +41,6 @@ export type ModelInfo = {
 };
 
 export const MODELS = [
-  // OpenAI
-  {
-    id: "gpt-5.4-mini",
-    provider: "openai",
-    label: "GPT-5.4 mini",
-    hint: "Fast, default",
-  },
-  {
-    id: "gpt-5.5",
-    provider: "openai",
-    label: "GPT-5.5",
-    hint: "Higher quality",
-  },
-  {
-    id: "gpt-5.3-codex",
-    provider: "openai",
-    label: "GPT-5.3 Codex",
-    hint: "Coding",
-  },
-  // Anthropic
-  {
-    id: "claude-haiku-4-5",
-    provider: "anthropic",
-    label: "Claude Haiku 4.5",
-    hint: "Fast",
-  },
-  {
-    id: "claude-sonnet-4-6",
-    provider: "anthropic",
-    label: "Claude Sonnet 4.6",
-    hint: "Balanced",
-  },
-  {
-    id: "claude-opus-4-7",
-    provider: "anthropic",
-    label: "Claude Opus 4.7",
-    hint: "Best",
-  },
   // Google
   {
     id: "gemini-3.1-pro-preview",
@@ -141,46 +53,6 @@ export const MODELS = [
     provider: "google",
     label: "Gemini 3 Flash",
     hint: "Fast",
-  },
-  // xAI
-  {
-    id: "grok-4.20-reasoning",
-    provider: "xai",
-    label: "Grok 4.20 Reasoning",
-    hint: "Reasoning",
-  },
-  {
-    id: "grok-4.20-non-reasoning",
-    provider: "xai",
-    label: "Grok 4.20",
-    hint: "Fast",
-  },
-  // Cerebras (autocomplete-tier)
-  {
-    id: "gpt-oss-120b",
-    provider: "cerebras",
-    label: "GPT-OSS 120B",
-    hint: "Cerebras · ultra-fast",
-  },
-  // Groq (autocomplete-tier)
-  {
-    id: "openai/gpt-oss-20b",
-    provider: "groq",
-    label: "GPT-OSS 20B",
-    hint: "Groq · ultra-fast",
-  },
-  // DeepSeek
-  {
-    id: "deepseek-v4-flash",
-    provider: "deepseek",
-    label: "DeepSeek V4 Flash",
-    hint: "Fast",
-  },
-  {
-    id: "deepseek-v4-pro",
-    provider: "deepseek",
-    label: "DeepSeek V4 Pro",
-    hint: "Best",
   },
   // LM Studio (local; model id is user-supplied at runtime)
   {
@@ -199,26 +71,14 @@ export function getModel(id: ModelId): ModelInfo {
   return m;
 }
 
-export const DEFAULT_MODEL_ID: ModelId = "gpt-5.4-mini";
+export const DEFAULT_MODEL_ID: ModelId = "gemini-3-flash-preview";
 
 /** Approximate context window (in tokens) per model. Used for the
  *  context-usage indicator in the AI mini-window header. Conservative
  *  estimates — actual provider limits may shift. */
 export const MODEL_CONTEXT_LIMITS: Record<string, number> = {
-  "gpt-5.4-mini": 400_000,
-  "gpt-5.5": 1_050_000,
-  "gpt-5.3-codex": 400_000,
-  "claude-haiku-4-5": 200_000,
-  "claude-sonnet-4-6": 200_000,
-  "claude-opus-4-7": 200_000,
   "gemini-3.1-pro-preview": 1_000_000,
   "gemini-3-flash-preview": 1_000_000,
-  "grok-4.20-reasoning": 2_000_000,
-  "grok-4.20-non-reasoning": 2_000_000,
-  "gpt-oss-120b": 128_000,
-  "openai/gpt-oss-20b": 128_000,
-  "deepseek-v4-flash": 1_000_000,
-  "deepseek-v4-pro": 1_000_000,
   "lmstudio-local": 32_000,
 };
 
@@ -235,11 +95,9 @@ export function providerNeedsKey(id: ProviderId): boolean {
 }
 
 /** Providers eligible for the editor's inline autocomplete (latency-critical). */
-export type AutocompleteProviderId = "cerebras" | "groq" | "lmstudio";
+export type AutocompleteProviderId = "lmstudio";
 
 export const AUTOCOMPLETE_PROVIDERS: readonly AutocompleteProviderId[] = [
-  "cerebras",
-  "groq",
   "lmstudio",
 ] as const;
 
@@ -247,8 +105,6 @@ export const DEFAULT_AUTOCOMPLETE_MODEL: Record<
   AutocompleteProviderId,
   string
 > = {
-  cerebras: "gpt-oss-120b",
-  groq: "openai/gpt-oss-20b",
   lmstudio: "qwen2.5-coder-7b-instruct",
 };
 
