@@ -1,5 +1,5 @@
 import { DEFAULT_MODEL_ID, getModel, type ModelId } from "../config";
-import { createTeraxGeminiAgent, type GeminiAgent, type GeminiSession } from "../engine/session";
+import { createCipherGeminiAgent, type GeminiAgent, type GeminiSession } from "../engine/session";
 import type { ToolContext } from "../bridge/tools/context";
 import { buildFsTools } from "../bridge/tools/fs";
 import { buildSearchTools } from "../bridge/tools/search";
@@ -46,7 +46,7 @@ export async function runSubagent({
     }
   }
 
-  const agent: GeminiAgent = createTeraxGeminiAgent({
+  const agent: GeminiAgent = createCipherGeminiAgent({
     model: getModel(modelId).id,
     instructions: def.systemPrompt,
     tools: filteredTools,

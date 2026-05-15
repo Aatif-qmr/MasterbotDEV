@@ -9,7 +9,7 @@ import {
   type Agent,
 } from "../agents/registry";
 
-const CHANGED_EVENT = "terax://ai-agents-changed";
+const CHANGED_EVENT = "cipher://ai-agents-changed";
 
 type AgentsState = {
   hydrated: boolean;

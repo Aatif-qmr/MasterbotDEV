@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-# Terax AI Release Automation Script
+# Cipher AI Release Automation Script
 # Version: 1.0.0-beta.1
 
 VERSION="1.0.0-beta.1"
-RELEASE_TITLE="Terax AI v$VERSION: The Native-First AI IDE"
+RELEASE_TITLE="Cipher AI v$VERSION: The Native-First AI IDE"
 TAG="v$VERSION"
 
-echo "🚀 Starting release process for Terax AI $VERSION..."
+echo "🚀 Starting release process for Cipher AI $VERSION..."
 
 # 1. Generate Changelog
 echo "📝 Generating changelog from git history..."
@@ -21,11 +21,11 @@ git log --pretty=format:"- %s" | grep "perf" | head -n 5 >> RELEASE_NOTES.md || 
 
 echo -e "\n## 📦 Installation Instructions" >> RELEASE_NOTES.md
 echo "### macOS" >> RELEASE_NOTES.md
-echo "Download the \`.dmg\` file and drag Terax to your Applications folder. If the app is blocked by Apple, run \`xattr -cr /Applications/Terax.app\` in your terminal." >> RELEASE_NOTES.md
+echo "Download the \`.dmg\` file and drag Cipher to your Applications folder. If the app is blocked by Apple, run \`xattr -cr /Applications/Cipher.app\` in your terminal." >> RELEASE_NOTES.md
 echo "### Windows" >> RELEASE_NOTES.md
 echo "Run the \`.msi\` installer. Requires Windows 10 or 11." >> RELEASE_NOTES.md
 echo "### Linux" >> RELEASE_NOTES.md
-echo "Download the \`.AppImage\`, make it executable (\`chmod +x Terax.AppImage\`), and run it." >> RELEASE_NOTES.md
+echo "Download the \`.AppImage\`, make it executable (\`chmod +x Cipher.AppImage\`), and run it." >> RELEASE_NOTES.md
 
 # 2. Build Production Binaries
 echo "🏗️ Building production binaries via Tauri..."

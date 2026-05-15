@@ -1,8 +1,8 @@
 /**
- * Gemini CLI Integration for Terax AI
+ * Gemini CLI Integration for Cipher AI
  * 
  * This module provides complete integration with Google's Gemini CLI,
- * making Gemini the sole AI agent with native control over Terax.
+ * making Gemini the sole AI agent with native control over Cipher.
  * 
  * @module gemini
  */
@@ -29,8 +29,8 @@ export type {
 
 // Native bridge implementations
 export {
-  GeminiTeraxFilesystem,
-  GeminiTeraxShell,
+  GeminiCipherFilesystem,
+  GeminiCipherShell,
   createGeminiSessionContext,
   GEMINI_SYSTEM_PROMPT,
   DEFAULT_SKILLS_CONFIG,
@@ -45,18 +45,18 @@ export {
   createSessionId,
   defineTool,
   skillDir,
-  createTeraxInstructions,
-  createTeraxGeminiAgent,
+  createCipherInstructions,
+  createCipherGeminiAgent,
 } from './session';
 
 /**
  * Quick start example:
  * 
  * ```typescript
- * import { createTeraxGeminiAgent } from './modules/ai/core/gemini';
+ * import { createCipherGeminiAgent } from './modules/ai/core/gemini';
  * 
- * // Create the sole Gemini agent for Terax
- * const agent = createTeraxGeminiAgent({
+ * // Create the sole Gemini agent for Cipher
+ * const agent = createCipherGeminiAgent({
  *   customInstructions: 'Focus on TypeScript and React best practices',
  * });
  * 

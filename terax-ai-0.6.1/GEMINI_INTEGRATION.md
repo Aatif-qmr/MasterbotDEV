@@ -1,30 +1,30 @@
-# Gemini CLI Integration for Terax AI
+# Gemini CLI Integration for Cipher AI
 
-This document describes how to integrate Google's Gemini CLI as the **sole AI agent** in Terax AI, providing complete native control similar to how Terax operates.
+This document describes how to integrate Google's Gemini CLI as the **sole AI agent** in Cipher AI, providing complete native control similar to how Cipher operates.
 
 ## Overview
 
-The goal is to make Gemini from the Gemini CLI the primary (and only) AI agent in Terax, with:
-- **Full native integration** - Direct access to Terax's Tauri-based filesystem, shell, and terminal
+The goal is to make Gemini from the Gemini CLI the primary (and only) AI agent in Cipher, with:
+- **Full native integration** - Direct access to Cipher's Tauri-based filesystem, shell, and terminal
 - **Complete control** - Ability to read/write files, execute commands, manage processes
 - **Skills system** - Load custom skills for specialized tasks
 - **Persistent sessions** - Resume conversations across app restarts
-- **Tool ecosystem** - Access to all Terax tools through Gemini's tool framework
+- **Tool ecosystem** - Access to all Cipher tools through Gemini's tool framework
 
 ## Architecture
 
 ### Current State (Multi-Agent via Vercel AI SDK)
 ```
-Terax UI → chatStore → createTeraxAgent (Vercel AI SDK) → Multiple Providers (OpenAI, Anthropic, Google, etc.)
+Cipher UI → chatStore → createCipherAgent (Vercel AI SDK) → Multiple Providers (OpenAI, Anthropic, Google, etc.)
                          ↓
                     buildTools() → native.ts → Tauri Commands
 ```
 
 ### Target State (Gemini-Only Native Integration)
 ```
-Terax UI → chatStore → GeminiAgent (Gemini CLI SDK) → Gemini API
+Cipher UI → chatStore → GeminiAgent (Gemini CLI SDK) → Gemini API
                             ↓
-                    GeminiTeraxFilesystem + GeminiTeraxShell → native.ts → Tauri Commands
+                    GeminiCipherFilesystem + GeminiCipherShell → native.ts → Tauri Commands
                             ↓
                     Skills System + Tool Registry
 ```
@@ -40,17 +40,17 @@ Mirrors the Gemini CLI SDK types without requiring the full SDK dependency:
 - `Tool`, `SkillReference` - Tools and skills definitions
 
 ### 2. Native Bridge (`gemini-native.ts`)
-Bridges Gemini's expected interfaces to Terax's existing native commands:
-- `GeminiTeraxFilesystem` - Implements `AgentFilesystem` using `native.readFile/writeFile`
-- `GeminiTeraxShell` - Implements `AgentShell` using `native.runCommand/shellBg*`
-- `GEMINI_SYSTEM_PROMPT` - Optimized system prompt for Terax context
+Bridges Gemini's expected interfaces to Cipher's existing native commands:
+- `GeminiCipherFilesystem` - Implements `AgentFilesystem` using `native.readFile/writeFile`
+- `GeminiCipherShell` - Implements `AgentShell` using `native.runCommand/shellBg*`
+- `GEMINI_SYSTEM_PROMPT` - Optimized system prompt for Cipher context
 - Helper functions for session context creation
 
 ### 3. Agent & Session (`gemini-session.ts`)
 Core implementation of Gemini agent and session management:
 - `GeminiAgent` - Main entry point, creates sessions
 - `GeminiSession` - Handles conversation history, streaming, tool execution
-- `createTeraxGeminiAgent()` - Factory for pre-configured agent
+- `createCipherGeminiAgent()` - Factory for pre-configured agent
 - `defineTool()`, `skillDir()` - Helpers for extending functionality
 
 ## Usage
@@ -58,10 +58,10 @@ Core implementation of Gemini agent and session management:
 ### Basic Integration
 
 ```typescript
-import { createTeraxGeminiAgent } from './modules/ai/lib/gemini-session';
+import { createCipherGeminiAgent } from './modules/ai/lib/gemini-session';
 
 // Create the sole Gemini agent
-const agent = createTeraxGeminiAgent({
+const agent = createCipherGeminiAgent({
   customInstructions: 'You are focused on React and TypeScript development',
   debug: false,
 });
@@ -112,7 +112,7 @@ const deployTool = defineTool(
   }
 );
 
-const agent = createTeraxGeminiAgent({
+const agent = createCipherGeminiAgent({
   tools: [deployTool],
 });
 ```
@@ -122,7 +122,7 @@ const agent = createTeraxGeminiAgent({
 ```typescript
 import { skillDir } from './modules/ai/lib/gemini-session';
 
-const agent = createTeraxGeminiAgent({
+const agent = createCipherGeminiAgent({
   skills: [
     skillDir('./skills/react-expert'),
     skillDir('./skills/security-audit'),
@@ -151,7 +151,7 @@ GEMINI_DEBUG=true
 
 ### Settings Integration
 
-Add to Terax settings (`src/modules/settings/sections/AISettings.tsx`):
+Add to Cipher settings (`src/modules/settings/sections/AISettings.tsx`):
 
 ```tsx
 interface GeminiSettings {
@@ -190,7 +190,7 @@ interface GeminiSettings {
 
 1. **Unified Experience**: One AI with complete context, no switching between providers
 2. **Deeper Integration**: Direct access to Gemini CLI's advanced features (skills, memory, policy engine)
-3. **Better Performance**: Fewer abstraction layers, optimized for Terax's architecture
+3. **Better Performance**: Fewer abstraction layers, optimized for Cipher's architecture
 4. **Enhanced Capabilities**: Access to Gemini-specific features like multimodal understanding
 5. **Simplified Maintenance**: One integration to maintain instead of multiple provider adapters
 
@@ -216,15 +216,15 @@ interface GeminiSettings {
 
 ```typescript
 // Unit tests for filesystem bridge
-describe('GeminiTeraxFilesystem', () => {
+describe('GeminiCipherFilesystem', () => {
   it('reads text files', async () => {
-    const fs = new GeminiTeraxFilesystem(() => '/workspace');
+    const fs = new GeminiCipherFilesystem(() => '/workspace');
     const content = await fs.readFile('test.txt');
     expect(content).toBe('test content');
   });
   
   it('handles binary files gracefully', async () => {
-    const fs = new GeminiTeraxFilesystem(() => '/workspace');
+    const fs = new GeminiCipherFilesystem(() => '/workspace');
     const content = await fs.readFile('image.png');
     expect(content).toContain('[Binary file]');
   });
@@ -233,7 +233,7 @@ describe('GeminiTeraxFilesystem', () => {
 // Integration tests for session
 describe('GeminiSession', () => {
   it('streams responses', async () => {
-    const agent = createTeraxGeminiAgent();
+    const agent = createCipherGeminiAgent();
     const session = agent.session();
     await session.initialize();
     
@@ -259,9 +259,9 @@ describe('GeminiSession', () => {
 
 - [Gemini CLI GitHub](https://github.com/google-gemini/gemini-cli)
 - [Gemini CLI SDK Docs](https://github.com/google-gemini/gemini-cli/tree/main/packages/sdk)
-- [Terax AI Documentation](./TERAX.md)
+- [Cipher AI Documentation](./TERAX.md)
 - [Vercel AI SDK](https://sdk.vercel.ai/docs) (current implementation)
 
 ## License
 
-This integration follows Terax AI's license and Google's Gemini CLI Apache 2.0 license.
+This integration follows Cipher AI's license and Google's Gemini CLI Apache 2.0 license.

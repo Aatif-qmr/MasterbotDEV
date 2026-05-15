@@ -2,7 +2,7 @@ import {
   DEFAULT_AUTOCOMPLETE_MODEL,
   type AutocompleteProviderId,
 } from "@/modules/ai/config";
-import { createTeraxGeminiAgent } from "@/modules/ai/engine/session";
+import { createCipherGeminiAgent } from "@/modules/ai/engine/session";
 import {
   buildUserPrompt,
   COMPLETION_SYSTEM_PROMPT,
@@ -25,7 +25,7 @@ export async function requestCompletion(
   const modelId =
     deps.modelId.trim() || DEFAULT_AUTOCOMPLETE_MODEL[deps.provider];
   
-  const agent = createTeraxGeminiAgent({
+  const agent = createCipherGeminiAgent({
     model: modelId,
     instructions: COMPLETION_SYSTEM_PROMPT,
     skillsEnabled: false,

@@ -11,7 +11,7 @@ pub struct TimeTravelEngine {
 impl TimeTravelEngine {
     pub fn open_or_create(project_path: String) -> Result<Self, String> {
         let mut path = PathBuf::from(&project_path);
-        path.push(".terax");
+        path.push(".cipher");
         
         if !path.exists() {
             fs::create_dir_all(&path).map_err(|e| e.to_string())?;

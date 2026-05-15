@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="public/logo.png" width="144" height="144" alt="Terax" />
-  <h1>Terax</h1>
+  <img src="public/logo.png" width="144" height="144" alt="Cipher" />
+  <h1>Cipher</h1>
 
   <p><strong>Open-source lightweight cross-platform AI-native terminal (ADE)</strong></p>
 
@@ -13,7 +13,7 @@
 
 ---
 
-Terax is a fast, lightweight AI terminal (ADE) built on Tauri 2 + Rust and React 19. It pairs a native PTY backend with a modern UI — multi-tab terminals, an integrated code editor, a file explorer, and a first-class **Gemini-First** AI engine.
+Cipher is a fast, lightweight AI terminal (ADE) built on Tauri 2 + Rust and React 19. It pairs a native PTY backend with a modern UI — multi-tab terminals, an integrated code editor, a file explorer, and a first-class **Gemini-First** AI engine.
 
 ## 🚀 Key Features
 
@@ -24,12 +24,12 @@ Terax is a fast, lightweight AI terminal (ADE) built on Tauri 2 + Rust and React
 
 ## 🔐 Security & Auth
 
-- **Zero API Keys**: Terax uses **Google OAuth 2.0 (PKCE)**. No static keys are ever stored on disk or in `.env`.
+- **Zero API Keys**: Cipher uses **Google OAuth 2.0 (PKCE)**. No static keys are ever stored on disk or in `.env`.
 - **Native Keychain**: All access and refresh tokens are stored strictly in your system's secure **OS Keychain** via the `keyring` crate.
 
 ## 📂 Architecture
 
-Terax follows a strict **Domain-Driven Design (DDD)** and **Native-First** approach. For more details on our architectural principles, see [CONTRIBUTING.md](CONTRIBUTING.md).
+Cipher follows a strict **Domain-Driven Design (DDD)** and **Native-First** approach. For more details on our architectural principles, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Screenshots
 
@@ -69,4 +69,4 @@ Tauri 2 · Rust · `portable-pty` · `rusqlite` · `zstd` · Bun · React 19 · 
 
 ## License
 
-Terax is licensed under the Apache-2.0 License. See [LICENSE](LICENSE) for more information.
+Cipher is licensed under the Apache-2.0 License. See [LICENSE](LICENSE) for more information.

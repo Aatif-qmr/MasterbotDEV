@@ -1,11 +1,11 @@
-# Contributing to Terax AI
+# Contributing to Cipher AI
 
-Thank you for your interest in contributing to Terax! We are building a high-performance, AI-native terminal environment. To maintain our standards, all contributions must adhere to the following strict architectural and security principles.
+Thank you for your interest in contributing to Cipher! We are building a high-performance, AI-native terminal environment. To maintain our standards, all contributions must adhere to the following strict architectural and security principles.
 
 ## 🚀 Mission & Architecture Principles
 
 - **Native-First:** We use **Rust** for all heavy lifting (Filesystem, SQLite, Auth, State Compression, Indexing) to ensure maximum performance and security. TypeScript is reserved strictly for the **UI and State Management**.
-- **Gemini-First:** Terax is built exclusively for the **Google Gemini** ecosystem. We do not support other LLM providers in the core engine. All AI requests must use the native Gemini OAuth PKCE flow.
+- **Gemini-First:** Cipher is built exclusively for the **Google Gemini** ecosystem. We do not support other LLM providers in the core engine. All AI requests must use the native Gemini OAuth PKCE flow.
 - **M1 Optimized:** Every feature must be optimized for **M1 8GB** base models. The entire application target is **<100MB RAM** overhead. Do not introduce heavy JavaScript libraries or ML runtimes.
 - **Strict Types:** We enforce **Strict TypeScript**. `--noImplicitAny` is mandatory. The use of `as any` is forbidden unless bridging unstable external SDKs, in which case it must be wrapped in a type-safe interface.
 
@@ -20,7 +20,7 @@ Thank you for your interest in contributing to Terax! We are building a high-per
 ```bash
 # Clone the repository
 git clone https://github.com/Aatif-qmr/MasterbotDEV.git
-cd terax-ai-0.6.1
+cd MasterbotDEV/cipher-ai-0.6.1
 
 # Install dependencies using Bun
 bun install

@@ -1,5 +1,5 @@
 /**
- * Gemini CLI Agent and Session implementation for Terax AI
+ * Gemini CLI Agent and Session implementation for Cipher AI
  * 
  * This module uses the official @google/genai SDK directly,
  * bypassing any middleware for maximum compatibility and performance.
@@ -404,9 +404,9 @@ export function skillDir(path: string): SkillReference {
 }
 
 /**
- * Default system instructions for Terax AI powered by Gemini
+ * Default system instructions for Cipher AI powered by Gemini
  */
-export function createTeraxInstructions(customInstructions?: string): SystemInstructions {
+export function createCipherInstructions(customInstructions?: string): SystemInstructions {
   return (context) => {
     return `${GEMINI_SYSTEM_PROMPT}${
       customInstructions ? `\n\n## CUSTOM INSTRUCTIONS\n${customInstructions}` : ''
@@ -415,9 +415,9 @@ export function createTeraxInstructions(customInstructions?: string): SystemInst
 }
 
 /**
- * Create a pre-configured Gemini agent for Terax AI
+ * Create a pre-configured Gemini agent for Cipher AI
  */
-export function createTeraxGeminiAgent(options?: Partial<GeminiAgentOptions>): GeminiAgent {
+export function createCipherGeminiAgent(options?: Partial<GeminiAgentOptions>): GeminiAgent {
   return new GeminiAgent({
     instructions: GEMINI_SYSTEM_PROMPT,
     model: options?.model ?? 'gemini-2.0-flash-exp',

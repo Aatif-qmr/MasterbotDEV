@@ -19,12 +19,12 @@ import {
 } from "../engine/sessions";
 import { chatRepository } from "../storage/repository";
 import { runStorageMigration } from "../storage/migrator";
-import { GeminiSession, createTeraxGeminiAgent } from "../engine/session";
+import { GeminiSession, createCipherGeminiAgent } from "../engine/session";
 import { GeminiEventType } from "../engine/gemini_types";
-import type { UIMessage, UIMessagePart, ChatStatus, TeraxToolCall } from "../engine/types";
+import type { UIMessage, UIMessagePart, ChatStatus, CipherToolCall } from "../engine/types";
 import { timeTravelService } from "@/modules/core/time_travel/service";
 
-export type { UIMessage, UIMessagePart, ChatStatus, TeraxToolCall };
+export type { UIMessage, UIMessagePart, ChatStatus, CipherToolCall };
 
 /**
  * Local Chat class replacement for Vercel AI SDK's Chat
@@ -38,7 +38,7 @@ export class Chat {
   private onStep?: (step: string | null) => void;
   private onError?: (error: Error) => void;
   private session: GeminiSession | null = null;
-  private agent = createTeraxGeminiAgent();
+  private agent = createCipherGeminiAgent();
 
   constructor(options: {
     id: string;
@@ -101,7 +101,7 @@ export class Chat {
           this.messages = [...this.messages];
           this.notify();
         } else if (event.type === GeminiEventType.ToolCallRequest) {
-          const toolCall = event.value as TeraxToolCall;
+          const toolCall = event.value as CipherToolCall;
           assistantMsg.parts.push({
             type: "tool-invocation",
             toolCallId: toolCall.callId,

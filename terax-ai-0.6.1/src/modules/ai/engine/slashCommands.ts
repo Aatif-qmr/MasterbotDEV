@@ -46,10 +46,10 @@ export const SLASH_COMMANDS: Record<string, SlashCommandMeta> = {
 };
 
 export const TERAX_CMD_RE =
-  /^<terax-command\s+name="([a-z0-9-]+)"(?:\s+state="([a-z]+)")?\s*\/>(?:\n+|$)/;
+  /^<cipher-command\s+name="([a-z0-9-]+)"(?:\s+state="([a-z]+)")?\s*\/>(?:\n+|$)/;
 
 export function wrapWithCommandMarker(prompt: string, name: string): string {
-  return `<terax-command name="${name}" />\n\n${prompt}`;
+  return `<cipher-command name="${name}" />\n\n${prompt}`;
 }
 
 export function tryRunSlashCommand(input: string): SlashOutcome {

@@ -77,7 +77,7 @@ export function AuthPanel() {
           ) : (
             <div className="space-y-4">
               <p className="text-sm">
-                Terax uses Google OAuth 2.0 with PKCE for secure authentication. 
+                Cipher uses Google OAuth 2.0 with PKCE for secure authentication. 
                 Your tokens are stored strictly in your system's secure Keychain.
               </p>
               <Button 

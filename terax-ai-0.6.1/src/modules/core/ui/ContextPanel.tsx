@@ -69,7 +69,7 @@ export function ContextPanel() {
              <div className="flex items-start">
                <AlertTriangle className="h-3.5 w-3.5 mr-2 mt-0.5" />
                <div className="text-[10px] leading-relaxed">
-                 Terax indices are purely local. File contents never leave your machine except when sent to Gemini as conversation context.
+                 Cipher indices are purely local. File contents never leave your machine except when sent to Gemini as conversation context.
                </div>
              </div>
           </div>

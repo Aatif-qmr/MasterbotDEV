@@ -13,7 +13,7 @@ pub struct ProjectIndexer {
 impl ProjectIndexer {
     pub fn open_or_create(project_path: &str) -> Result<Self, String> {
         let mut db_path = PathBuf::from(project_path);
-        db_path.push(".terax");
+        db_path.push(".cipher");
         if !db_path.exists() {
             fs::create_dir_all(&db_path).map_err(|e| e.to_string())?;
         }
@@ -70,7 +70,7 @@ impl ProjectIndexer {
             .git_ignore(true)
             .filter_entry(|e| {
                 let name = e.file_name().to_string_lossy();
-                !name.starts_with('.') || name == ".terax" || name == ".gemini"
+                !name.starts_with('.') || name == ".cipher" || name == ".gemini"
             })
             .build();
 

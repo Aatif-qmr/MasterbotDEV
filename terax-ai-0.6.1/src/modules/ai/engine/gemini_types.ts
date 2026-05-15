@@ -1,5 +1,5 @@
 /**
- * Type definitions for Gemini CLI integration with Terax AI
+ * Type definitions for Gemini CLI integration with Cipher AI
  * 
  * These types mirror the Gemini CLI SDK types to enable
  * seamless integration without requiring the full SDK as a dependency.

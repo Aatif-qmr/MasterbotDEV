@@ -3,7 +3,7 @@ export { TerminalStack } from "./TerminalStack";
 export {
   disposeSession,
   respawnSession,
-  type TeraxOpenInput,
+  type CipherOpenInput,
 } from "./core/useTerminalSession";
 export {
   hasLeaf,

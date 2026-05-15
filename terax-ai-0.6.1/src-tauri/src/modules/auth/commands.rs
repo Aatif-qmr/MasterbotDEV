@@ -26,7 +26,7 @@ impl AuthState {
     }
 }
 
-type TeraxOAuthClient = BasicClient<
+type CipherOAuthClient = BasicClient<
     EndpointSet,     // Auth
     EndpointNotSet,  // Device
     EndpointNotSet,  // Introspection
@@ -34,11 +34,11 @@ type TeraxOAuthClient = BasicClient<
     EndpointSet,     // Token
 >;
 
-fn create_client() -> TeraxOAuthClient {
+fn create_client() -> CipherOAuthClient {
     let client_id = ClientId::new("764086051750-761d29909ba06578.apps.googleusercontent.com".to_string());
     let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string()).expect("Invalid auth URL");
     let token_url = TokenUrl::new("https://oauth2.googleapis.com/token".to_string()).expect("Invalid token URL");
-    let redirect_url = RedirectUrl::new("terax://oauth/callback".to_string()).expect("Invalid redirect URL");
+    let redirect_url = RedirectUrl::new("cipher://oauth/callback".to_string()).expect("Invalid redirect URL");
 
     BasicClient::new(client_id)
         .set_auth_uri(auth_url)

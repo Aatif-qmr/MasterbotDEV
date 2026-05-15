@@ -134,7 +134,7 @@ mod unix {
 
     fn integration_root() -> Result<PathBuf, String> {
         let home = dirs::home_dir().ok_or_else(|| "could not resolve home dir".to_string())?;
-        let root = home.join(".cache").join("terax").join("shell-integration");
+        let root = home.join(".cache").join("cipher").join("shell-integration");
         fs::create_dir_all(&root).map_err(|e| format!("create {}: {e}", root.display()))?;
         Ok(root)
     }
@@ -173,7 +173,7 @@ mod unix {
         }
         // Atomic replace: a parallel shell startup must never source a half-written file.
         let mut tmp: OsString = path.as_os_str().to_owned();
-        tmp.push(".__terax_tmp__");
+        tmp.push(".__cipher_tmp__");
         let tmp = PathBuf::from(tmp);
         fs::write(&tmp, content).map_err(|e| format!("write {}: {e}", tmp.display()))?;
         fs::rename(&tmp, path).map_err(|e| {
@@ -229,7 +229,7 @@ mod windows {
 
     fn integration_root() -> Result<PathBuf, String> {
         let home = dirs::home_dir().ok_or_else(|| "could not resolve home dir".to_string())?;
-        let root = home.join(".cache").join("terax").join("shell-integration");
+        let root = home.join(".cache").join("cipher").join("shell-integration");
         fs::create_dir_all(&root).map_err(|e| format!("create {}: {e}", root.display()))?;
         Ok(root)
     }
@@ -249,7 +249,7 @@ mod windows {
             }
         }
         let mut tmp: OsString = path.as_os_str().to_owned();
-        tmp.push(".__terax_tmp__");
+        tmp.push(".__cipher_tmp__");
         let tmp = PathBuf::from(tmp);
         fs::write(&tmp, content).map_err(|e| format!("write {}: {e}", tmp.display()))?;
         fs::rename(&tmp, path).map_err(|e| {

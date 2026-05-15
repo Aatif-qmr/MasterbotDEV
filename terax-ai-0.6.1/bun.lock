@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "terax",
+      "name": "cipher",
       "dependencies": {
         "@codemirror/commands": "^6.10.3",
         "@codemirror/lang-css": "^6.3.1",

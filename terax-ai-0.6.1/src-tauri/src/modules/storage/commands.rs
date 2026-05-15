@@ -29,7 +29,7 @@ pub async fn storage_get_context(
     }
     
     let mut db_path = std::path::PathBuf::from(&project_path);
-    db_path.push(".terax");
+    db_path.push(".cipher");
     db_path.push("context.db");
     
     Ok(ProjectContext {

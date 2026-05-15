@@ -1,8 +1,8 @@
 /**
- * Native Gemini CLI integration for Terax AI
+ * Native Gemini CLI integration for Cipher AI
  * 
  * This module provides deep integration with the Gemini CLI SDK,
- * making Gemini the sole AI agent with full control over Terax.
+ * making Gemini the sole AI agent with full control over Cipher.
  */
 
 import type { SessionContext, AgentFilesystem, AgentShell } from './gemini_types';
@@ -10,9 +10,9 @@ import { native } from '../bridge/native';
 import type { CommandOutput } from '../bridge/native';
 
 /**
- * Gemini-native filesystem implementation that bridges to Terax's native Tauri commands
+ * Gemini-native filesystem implementation that bridges to Cipher's native Tauri commands
  */
-export class GeminiTeraxFilesystem implements AgentFilesystem {
+export class GeminiCipherFilesystem implements AgentFilesystem {
   constructor() {}
 
   async readFile(path: string): Promise<string | null> {
@@ -68,9 +68,9 @@ export class GeminiTeraxFilesystem implements AgentFilesystem {
 }
 
 /**
- * Gemini-native shell implementation that bridges to Terax's Tauri shell commands
+ * Gemini-native shell implementation that bridges to Cipher's Tauri shell commands
  */
-export class GeminiTeraxShell implements AgentShell {
+export class GeminiCipherShell implements AgentShell {
   private cwd: string | null = null;
 
   constructor(getCwd: () => string | null) {
@@ -193,8 +193,8 @@ export function createGeminiSessionContext(
   transcript: any[],
   getCwd: () => string | null,
 ): SessionContext {
-  const fs = new GeminiTeraxFilesystem();
-  const shell = new GeminiTeraxShell(getCwd);
+  const fs = new GeminiCipherFilesystem();
+  const shell = new GeminiCipherShell(getCwd);
 
   return {
     sessionId,
@@ -210,12 +210,12 @@ export function createGeminiSessionContext(
 }
 
 /**
- * Gemini CLI system prompt optimized for Terax AI
+ * Gemini CLI system prompt optimized for Cipher AI
  */
-export const GEMINI_SYSTEM_PROMPT = `You are Terax AI, an advanced AI developer assistant powered by Google's Gemini.
+export const GEMINI_SYSTEM_PROMPT = `You are Cipher AI, an advanced AI developer assistant powered by Google's Gemini.
 
 ## CORE IDENTITY
-You are the SOLE AI agent in Terax AI, with complete native integration and control over:
+You are the SOLE AI agent in Cipher AI, with complete native integration and control over:
 - File system operations (read, write, create, delete, search)
 - Terminal/shell execution (commands, background processes, PTY sessions)
 - Editor integration (code editing, previews, file management)
@@ -279,7 +279,7 @@ You receive terminal context including:
 Use this context as ground truth - don't ask users where they are.`;
 
 /**
- * Default skills configuration for Terax AI
+ * Default skills configuration for Cipher AI
  */
 export const DEFAULT_SKILLS_CONFIG = {
   enabled: true,
@@ -301,7 +301,7 @@ export interface GeminiIntegrationConfig {
 }
 
 /**
- * Default configuration for Gemini in Terax
+ * Default configuration for Gemini in Cipher
  */
 export const DEFAULT_GEMINI_CONFIG: GeminiIntegrationConfig = {
   model: 'gemini-2.5-pro', // Or let auto-select

@@ -36,17 +36,17 @@ export function registerPromptTracker(term: Terminal): PromptTracker {
   };
 }
 
-export type TeraxOpenInput = {
+export type CipherOpenInput = {
   file: string;
 };
 
-export function registerTeraxOpenHandler(
+export function registerCipherOpenHandler(
   term: Terminal,
-  onTeraxOpen: (input: TeraxOpenInput) => void,
+  onCipherOpen: (input: CipherOpenInput) => void,
 ): () => void {
   const d = term.parser.registerOscHandler(8888, (data) => {
-    const input = parseTeraxOpen(data);
-    if (input) onTeraxOpen(input);
+    const input = parseCipherOpen(data);
+    if (input) onCipherOpen(input);
     return true;
   });
   return () => d.dispose();
@@ -64,7 +64,7 @@ function parseOsc7(data: string): string | null {
   return path;
 }
 
-function parseTeraxOpen(data: string): TeraxOpenInput | null {
+function parseCipherOpen(data: string): CipherOpenInput | null {
   // Parse format: "file=/path/to/file"
   const fileMatch = data.match(/file=([^;]+)/);
 

@@ -14,7 +14,7 @@ export class SQLiteService {
 
   async initialize(): Promise<void> {
     try {
-      this.dbPath = 'terax_ai.db'; // Stubbed path
+      this.dbPath = 'cipher_ai.db'; // Stubbed path
       console.log('SQLite service initialized with path:', this.dbPath);
     } catch (error) {
       console.error('Failed to initialize SQLite service:', error);

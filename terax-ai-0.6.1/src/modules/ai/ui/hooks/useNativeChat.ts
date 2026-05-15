@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { GeminiSession, createTeraxGeminiAgent } from '../../engine/session';
+import { GeminiSession, createCipherGeminiAgent } from '../../engine/session';
 import { GeminiEventType } from '../../engine/gemini_types';
 
 export type Message = {
@@ -15,7 +15,7 @@ export function useNativeChat(options: { sessionId: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState<ChatStatus>('idle');
   const [error, setError] = useState<Error | undefined>();
-  const agentRef = useRef(createTeraxGeminiAgent());
+  const agentRef = useRef(createCipherGeminiAgent());
   const sessionRef = useRef<GeminiSession | null>(null);
 
   const append = useCallback(async (message: { content: string; role: 'user' }) => {

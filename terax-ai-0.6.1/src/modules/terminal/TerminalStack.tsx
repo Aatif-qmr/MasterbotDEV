@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { PaneTreeView } from "./PaneTreeView";
 import type { TerminalPaneHandle } from "./TerminalPane";
 import { leafIds } from "./core/panes";
-import { type TeraxOpenInput } from "./core/useTerminalSession";
+import { type CipherOpenInput } from "./core/useTerminalSession";
 
 type Props = {
   tabs: Tab[];
@@ -15,7 +15,7 @@ type Props = {
   onCwd: (leafId: number, cwd: string) => void;
   onDetectedLocalUrl: (leafId: number, url: string) => void;
   onExit: (leafId: number, code: number) => void;
-  onTeraxOpen?: (leafId: number, input: TeraxOpenInput) => void;
+  onCipherOpen?: (leafId: number, input: CipherOpenInput) => void;
   onFocusLeaf: (tabId: number, leafId: number) => void;
 };
 
@@ -25,7 +25,7 @@ type Bundle = {
   onCwd: (cwd: string) => void;
   onDetectedUrl: (url: string) => void;
   onExit: (code: number) => void;
-  onTeraxOpen: (input: TeraxOpenInput) => void;
+  onCipherOpen: (input: CipherOpenInput) => void;
 };
 
 export function TerminalStack({
@@ -36,7 +36,7 @@ export function TerminalStack({
   onCwd,
   onDetectedLocalUrl,
   onExit,
-  onTeraxOpen,
+  onCipherOpen,
   onFocusLeaf,
 }: Props) {
   const terminals = tabs.filter((t) => t.kind === "terminal");
@@ -46,7 +46,7 @@ export function TerminalStack({
   const cwdRef = useRef(onCwd);
   const detectedUrlRef = useRef(onDetectedLocalUrl);
   const exitRef = useRef(onExit);
-  const teraxOpenRef = useRef(onTeraxOpen);
+  const cipherOpenRef = useRef(onCipherOpen);
   useEffect(() => {
     registerRef.current = registerHandle;
   }, [registerHandle]);
@@ -63,8 +63,8 @@ export function TerminalStack({
     exitRef.current = onExit;
   }, [onExit]);
   useEffect(() => {
-    teraxOpenRef.current = onTeraxOpen;
-  }, [onTeraxOpen]);
+    cipherOpenRef.current = onCipherOpen;
+  }, [onCipherOpen]);
 
   const bundles = useRef(new Map<number, Bundle>());
   const getBundle = (leafId: number): Bundle => {
@@ -76,7 +76,7 @@ export function TerminalStack({
         onCwd: (cwd) => cwdRef.current(leafId, cwd),
         onDetectedUrl: (url) => detectedUrlRef.current(leafId, url),
         onExit: (code) => exitRef.current(leafId, code),
-        onTeraxOpen: (input) => teraxOpenRef.current?.(leafId, input),
+        onCipherOpen: (input) => cipherOpenRef.current?.(leafId, input),
       };
       bundles.current.set(leafId, b);
     }

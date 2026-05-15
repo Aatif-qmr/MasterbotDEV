@@ -77,7 +77,7 @@ export function ModelsSection() {
     <div className="flex flex-col gap-7">
       <SectionHeader
         title="Models"
-        description="Terax is Gemini-First. Configure your Gemini models or connect a local LM Studio server."
+        description="Cipher is Gemini-First. Configure your Gemini models or connect a local LM Studio server."
       />
 
       <div className="flex flex-col gap-2">

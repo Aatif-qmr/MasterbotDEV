@@ -1,7 +1,7 @@
 import { chatRepository } from './repository';
 
 export async function runStorageMigration() {
-  if (localStorage.getItem('terax_migration_complete') === 'true') {
+  if (localStorage.getItem('cipher_migration_complete') === 'true') {
     return;
   }
 
@@ -28,7 +28,7 @@ export async function runStorageMigration() {
       }
     }
 
-    localStorage.setItem('terax_migration_complete', 'true');
+    localStorage.setItem('cipher_migration_complete', 'true');
     console.log('Chat history migration complete.');
   } catch (err) {
     console.error('Migration failed:', err);

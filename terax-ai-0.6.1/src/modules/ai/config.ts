@@ -1,4 +1,4 @@
-export const KEYRING_SERVICE = "terax-ai";
+export const KEYRING_SERVICE = "com.aatifqmr.cipher";
 
 export type ProviderId = "google" | "lmstudio";
 
@@ -112,7 +112,7 @@ export const LMSTUDIO_DEFAULT_BASE_URL = "http://localhost:1234/v1";
 export const MAX_AGENT_STEPS = 24;
 export const TERMINAL_BUFFER_LINES = 300;
 
-export const SYSTEM_PROMPT = `You are Terax, an AI assistant embedded in a developer terminal emulator.
+export const SYSTEM_PROMPT = `You are Cipher, an AI assistant embedded in a developer terminal emulator.
 
 Every turn includes a <terminal-context> block with: workspace_root, active_terminal_cwd, optionally active_file, and the last lines of the user's terminal. Treat this as ground truth — do not ask the user where they are.
 

@@ -1,4 +1,4 @@
-# terax-shell-integration (bashrc)
+# cipher-shell-integration (bashrc)
 #
 # Differences vs zsh integration:
 # - We emulate login-shell init manually (/etc/profile, profile files) because
@@ -24,7 +24,7 @@ if [ -z "$__TERAX_HOOKS_LOADED" ]; then
   # on reload, guard with a flag.
   [ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc"
 
-  _terax_urlencode() {
+  _cipher_urlencode() {
     local LC_ALL=C s="$1" i c
     for (( i=0; i<${#s}; i++ )); do
       c="${s:i:1}"
@@ -35,10 +35,10 @@ if [ -z "$__TERAX_HOOKS_LOADED" ]; then
     done
   }
 
-  _terax_precmd() {
-    local _terax_ret=$?
-    printf '\e]133;D;%s\e\\' "$_terax_ret"
-    printf '\e]7;file://%s%s\e\\' "${HOSTNAME:-$(uname -n 2>/dev/null)}" "$(_terax_urlencode "$PWD")"
+  _cipher_precmd() {
+    local _cipher_ret=$?
+    printf '\e]133;D;%s\e\\' "$_cipher_ret"
+    printf '\e]7;file://%s%s\e\\' "${HOSTNAME:-$(uname -n 2>/dev/null)}" "$(_cipher_urlencode "$PWD")"
     if [ -z "$__TERAX_PS1_INJECTED" ]; then
       PS1='\[\e]133;B\e\\\]'"$PS1"
       __TERAX_PS1_INJECTED=1
@@ -47,8 +47,8 @@ if [ -z "$__TERAX_HOOKS_LOADED" ]; then
   }
 
   case ":${PROMPT_COMMAND:-}:" in
-    *":_terax_precmd:"*) ;;
-    *) PROMPT_COMMAND="_terax_precmd${PROMPT_COMMAND:+;$PROMPT_COMMAND}" ;;
+    *":_cipher_precmd:"*) ;;
+    *) PROMPT_COMMAND="_cipher_precmd${PROMPT_COMMAND:+;$PROMPT_COMMAND}" ;;
   esac
 
   # Pre-exec marker via PS0 (bash 4.4+). PS0 is expanded just before a command
@@ -59,13 +59,13 @@ if [ -z "$__TERAX_HOOKS_LOADED" ]; then
     PS0='\[\e]133;C\e\\\]'"${PS0:-}"
   fi
 
-  # terax_open: open file in editor tab via OSC 8888.
-  # Usage: terax_open <file>
-  terax_open() {
+  # cipher_open: open file in editor tab via OSC 8888.
+  # Usage: cipher_open <file>
+  cipher_open() {
     local file="$1"
 
     if [ -z "$file" ]; then
-      printf "usage: terax_open <file>\n" >&2
+      printf "usage: cipher_open <file>\n" >&2
       return 1
     fi
 
@@ -76,17 +76,17 @@ if [ -z "$__TERAX_HOOKS_LOADED" ]; then
 
     # Check that the path exists and is a regular file.
     if [ ! -f "$file" ]; then
-      printf "terax_open: not a file: %s\n" "$file" >&2
+      printf "cipher_open: not a file: %s\n" "$file" >&2
       return 1
     fi
 
     # Emit OSC 8888 with URL-encoded file path.
-    printf '\e]8888;file=%s\e\\' "$(_terax_urlencode "$file")"
+    printf '\e]8888;file=%s\e\\' "$(_cipher_urlencode "$file")"
   }
 
   # Shorthand alias.
-  alias tp='terax_open'
+  alias tp='cipher_open'
 
-  _terax_precmd
+  _cipher_precmd
 fi
 :

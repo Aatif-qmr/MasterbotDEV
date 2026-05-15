@@ -7,7 +7,7 @@ import {
   type Snippet,
 } from "../engine/snippets";
 
-const CHANGED_EVENT = "terax://ai-snippets-changed";
+const CHANGED_EVENT = "cipher://ai-snippets-changed";
 
 type State = {
   hydrated: boolean;

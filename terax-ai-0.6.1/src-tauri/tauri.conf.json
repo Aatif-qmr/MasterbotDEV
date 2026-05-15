@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Terax",
+  "productName": "Cipher",
   "version": "1.0.0-beta.1",
-  "identifier": "app.crynta.terax",
+  "identifier": "com.aatifqmr.cipher",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
   "app": {
     "windows": [
       {
-        "title": "Terax",
+        "title": "Cipher",
         "width": 800,
         "height": 600,
         "minWidth": 420,
@@ -30,7 +30,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "createUpdaterArtifacts": true,
+    "createUpdaterArtifacts": false,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -39,7 +39,8 @@
       "icons/icon.ico"
     ],
     "macOS": {
-      "minimumSystemVersion": "10.15"
+      "minimumSystemVersion": "10.15",
+      "entitlements": "entitlements.macOS.plist"
     },
     "linux": {
       "deb": {
@@ -64,16 +65,12 @@
       }
     },
     "category": "DeveloperTool",
-    "shortDescription": "AI-native terminal emulator",
-    "longDescription": "Terax — an open-source AI-native terminal emulator with multi-tab, file explorer, code editor, web preview, voice input, and AI agents."
+    "shortDescription": "Native-first AI IDE powered by Gemini",
+    "longDescription": "Cipher — an open-source native-first AI IDE with multi-tab terminal, file explorer, code editor, and AI agents."
   },
   "plugins": {
-    "keychain": {
-      "service": "com.terax.ai.oauth"
-    },
     "updater": {
       "active": false,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNCQUJGRDhBQjYwRTM0NjkKUldScE5BNjJpdjJyT3dIN0dqbUpHaDA4QW1GaDVmTTllRXdZVk96dFNTRUZ3Y2hiVGszYjFqRloK",
       "endpoints": []
     }
   }

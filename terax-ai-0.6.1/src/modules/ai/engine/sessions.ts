@@ -9,7 +9,7 @@ export type SessionMeta = {
   projectPath?: string; // Track which project this session belongs to
 };
 
-const STORE_PATH = "terax-ai-sessions.json";
+const STORE_PATH = "cipher-ai-sessions.json";
 const KEY_SESSIONS = "sessions";
 const KEY_ACTIVE = "activeId";
 

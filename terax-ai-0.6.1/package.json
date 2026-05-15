@@ -1,8 +1,14 @@
 {
-  "name": "terax",
+  "name": "cipher-ide",
   "private": true,
   "version": "1.0.0-beta.1",
+  "productName": "Cipher",
+  "author": "Aatif-qmr",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aatif-qmr/MasterbotDEV"
+  },
   "scripts": {
     "dev": "bun run --bun vite",
     "generate:schema": "cd src-tauri && cargo check",

@@ -8,7 +8,7 @@ pub struct ContextRetriever {
 impl ContextRetriever {
     pub fn open(project_path: &str) -> Result<Self, String> {
         let mut db_path = std::path::PathBuf::from(project_path);
-        db_path.push(".terax");
+        db_path.push(".cipher");
         db_path.push("context.db");
 
         let conn = Connection::open(db_path).map_err(|e| e.to_string())?;

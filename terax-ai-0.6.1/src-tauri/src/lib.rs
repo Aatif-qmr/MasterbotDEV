@@ -47,8 +47,7 @@ pub fn run() {
     #[cfg(target_os = "linux")]
     apply_wayland_webkit_workaround();
 
-    tauri::Builder::default()
-        .plugin(tauri_plugin_keychain::init())
+    let result = tauri::Builder::default()
         .plugin(tauri_plugin_process::init())
         .plugin(
             tauri_plugin_window_state::Builder::new()
@@ -65,7 +64,10 @@ pub fn run() {
         )
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            modules::init(app)?;
+            if let Err(e) = modules::init(app) {
+                log::error!("Failed to initialize modules: {}", e);
+                return Err(e.into());
+            }
             Ok(())
         })
         .manage(pty::PtyState::default())
@@ -125,6 +127,19 @@ pub fn run() {
                     context::commands::ctx_get_project_summary,
                     autocomplete::commands::ac_get_suggestion,
                 ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!());
+
+    match result {
+        Ok(app) => {
+            app.run(|_app_handle, _event| {});
+        }
+        Err(e) => {
+            rfd::MessageDialog::new()
+                .set_title("Startup Error")
+                .set_description(&format!("Cipher failed to start: {}\n\nPlease check your permissions and try again.", e))
+                .set_level(rfd::MessageLevel::Error)
+                .show();
+            std::process::exit(1);
+        }
+    }
 }

@@ -17,15 +17,15 @@ export interface GeminiStreamChunk {
 }
 
 /**
- * Exact shape of tool requests in Terax AI
+ * Exact shape of tool requests in Cipher AI
  */
-export interface TeraxToolCall {
+export interface CipherToolCall {
   callId: string;
   name: string;
   args: Record<string, unknown>;
 }
 
-export interface TeraxToolResponse {
+export interface CipherToolResponse {
   callId: string;
   name: string;
   result: unknown;
@@ -61,7 +61,7 @@ export interface UIMessage {
   parts: UIMessagePart[];
 }
 
-export interface TeraxTool<T extends ZodTypeAny = ZodTypeAny> {
+export interface CipherTool<T extends ZodTypeAny = ZodTypeAny> {
   description: string;
   inputSchema: T;
   execute: (args: z.infer<T>) => Promise<unknown>;
@@ -73,7 +73,7 @@ export function tool<T extends ZodTypeAny>(options: {
   inputSchema: T;
   execute: (args: z.infer<T>) => Promise<unknown>;
   needsApproval?: boolean;
-}): TeraxTool<T> {
+}): CipherTool<T> {
   return options;
 }
 
@@ -209,7 +209,7 @@ export interface GeminiStreamEvent {
 
 export interface ToolCallRequestEvent extends GeminiStreamEvent {
   type: GeminiEventType.ToolCallRequest;
-  value: TeraxToolCall;
+  value: CipherToolCall;
 }
 
 export interface ToolCallResponseEvent extends GeminiStreamEvent {

@@ -49,7 +49,7 @@ import {
   respawnSession,
   TerminalStack,
   type TerminalPaneHandle,
-  type TeraxOpenInput,
+  type CipherOpenInput,
 } from "@/modules/terminal";
 import { ThemeProvider } from "@/modules/theme";
 import { timeTravelService } from "@/modules/core/time_travel/service";
@@ -355,7 +355,7 @@ export default function App() {
       // Dispatch a window event the composer listens for. Same pattern as
       // selections — keeps file-explorer decoupled from the AI module.
       window.dispatchEvent(
-        new CustomEvent<string>("terax:ai-attach-file", { detail: path }),
+        new CustomEvent<string>("cipher:ai-attach-file", { detail: path }),
       );
       openPanel();
       focusInput(null);
@@ -635,8 +635,8 @@ export default function App() {
     [closePaneByLeaf],
   );
 
-  const handleTeraxOpen = useCallback(
-    (_tabId: number, input: TeraxOpenInput) => {
+  const handleCipherOpen = useCallback(
+    (_tabId: number, input: CipherOpenInput) => {
       // Always open in a new tab
       openFileTab(input.file);
     },
@@ -768,7 +768,7 @@ export default function App() {
                         onCwd={handleTerminalCwd}
                         onDetectedLocalUrl={handleDetectedLocalUrl}
                         onExit={handleLeafExit}
-                        onTeraxOpen={handleTeraxOpen}
+                        onCipherOpen={handleCipherOpen}
                         onFocusLeaf={handleFocusLeaf}
                       />
                     </div>
