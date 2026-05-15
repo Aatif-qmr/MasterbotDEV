@@ -27,6 +27,8 @@ export async function getKey(provider: ProviderId): Promise<string | null> {
   }
 }
 
+import { emitKeysChanged } from "../../settings/store";
+
 export async function setKey(provider: ProviderId, key: string): Promise<void> {
   if (!providerNeedsKey(provider)) {
     throw new Error(`${provider} does not use an API key`);
@@ -38,6 +40,7 @@ export async function setKey(provider: ProviderId, key: string): Promise<void> {
     account: getProvider(provider).keyringAccount,
     password: trimmed,
   });
+  await emitKeysChanged();
 }
 
 export async function clearKey(provider: ProviderId): Promise<void> {
@@ -47,6 +50,7 @@ export async function clearKey(provider: ProviderId): Promise<void> {
       service: KEYRING_SERVICE,
       account: getProvider(provider).keyringAccount,
     });
+    await emitKeysChanged();
   } catch {
     // already absent — fine
   }

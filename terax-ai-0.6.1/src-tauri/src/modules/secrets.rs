@@ -31,8 +31,16 @@ fn read_store(app: &AppHandle) -> Result<HashMap<String, String>, String> {
         return Ok(HashMap::new());
     }
     let bytes = fs::read(&path).map_err(|e| e.to_string())?;
-    serde_json::from_slice::<HashMap<String, String>>(&bytes).map_err(|e| e.to_string())
+    if bytes.is_empty() {
+        return Ok(HashMap::new());
+    }
+    serde_json::from_slice::<HashMap<String, String>>(&bytes).unwrap_or_default().pipe(|m| Ok(m))
 }
+
+trait Pipe {
+    fn pipe<F, R>(self, f: F) -> R where F: FnOnce(Self) -> R, Self: Sized { f(self) }
+}
+impl<T> Pipe for T {}
 
 fn write_store(app: &AppHandle, map: &HashMap<String, String>) -> Result<(), String> {
     use std::io::Write;

@@ -39,22 +39,30 @@ export function createSessionId(): string {
   return `${timestamp}-${randomPart}`;
 }
 
+import { homeDir } from '@tauri-apps/api/path';
+
 async function getBootstrapToken(): Promise<string | null> {
   try {
-    const configDir = await native.runCommand('echo $HOME', null, 5);
-    const home = configDir.stdout?.trim() || '';
-    if (!home) return null;
-    
+    const home = await homeDir();
     const tokenPath = `${home}/.ccliconfig/auth.json`;
     const content = await native.readFile(tokenPath);
     if (content.kind === 'text') {
       const data = JSON.parse(content.content);
       return data.access_token;
     }
-    return null;
   } catch (e) {
-    return null;
+    // Fallback to app's internal secrets.json if CLI token fails
+    try {
+      const v = await native.runCommand('cat "$HOME/Library/Application Support/com.aatifqmr.cipher/secrets.json"', null, 2);
+      if (v.stdout) {
+        const map = JSON.parse(v.stdout);
+        return map["cipher-keyring::google"] || null;
+      }
+    } catch {
+       // ignore
+    }
   }
+  return null;
 }
 
 /**

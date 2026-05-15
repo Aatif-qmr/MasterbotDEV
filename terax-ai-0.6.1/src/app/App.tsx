@@ -9,6 +9,7 @@ import {
   AgentRunBridge,
   AiInputBar,
   AiMiniWindow,
+  getAllKeys,
   SelectionAskAi,
   useChatStore,
 } from "@/modules/ai";
@@ -32,6 +33,7 @@ import {
 import { PreviewStack, type PreviewPaneHandle } from "@/modules/preview";
 import { openSettingsWindow } from "@/modules/settings/openSettingsWindow";
 import { usePreferencesStore } from "@/modules/settings/preferences";
+import { onKeysChanged } from "@/modules/settings/store";
 import {
   ShortcutsDialog,
   useGlobalShortcuts,
@@ -139,10 +141,32 @@ export default function App() {
   const panelOpen = useChatStore((s) => s.panelOpen);
   const setLive = useChatStore((s) => s.setLive);
   const setSelectedModelId = useChatStore((s) => s.setSelectedModelId);
+  const setApiKeys = useChatStore((s) => s.setApiKeys);
   const respondToApproval = useChatStore((s) => s.respondToApproval);
   const hasComposer = true;
 
-  const keysLoaded = true;
+  const [keysLoaded, setKeysLoaded] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    const reload = () => {
+      void getAllKeys()
+        .then((keys) => {
+          if (!alive) return;
+          setApiKeys(keys);
+          setKeysLoaded(true);
+        })
+        .catch((err) => {
+          console.error("Failed to load API keys:", err);
+          if (alive) setKeysLoaded(true); // Still show app even if keys fail
+        });
+    };
+    reload();
+    const unlistenP = onKeysChanged(reload);
+    return () => {
+      alive = false;
+      void unlistenP.then((fn) => fn());
+    };
+  }, [setApiKeys]);
 
   // Hydrate the cross-window preference store and mirror the default model
   // into chatStore so the dropdown reflects what the user picked in Settings.

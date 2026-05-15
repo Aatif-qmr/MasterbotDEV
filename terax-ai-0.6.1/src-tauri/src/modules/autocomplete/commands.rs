@@ -3,20 +3,29 @@ use serde_json::json;
 use tauri::{AppHandle, Manager};
 use std::fs;
 use serde::Deserialize;
+use std::collections::HashMap;
 
 #[derive(Deserialize)]
 struct AuthToken {
     access_token: String,
 }
 
-fn load_token_from_file() -> Result<String, String> {
-    let file_path = dirs::home_dir()
-        .ok_or("Could not find home directory")?
+fn load_token_from_cli() -> Option<String> {
+    let file_path = dirs::home_dir()?
         .join(".ccliconfig")
         .join("auth.json");
-    let json = fs::read_to_string(file_path).map_err(|e| e.to_string())?;
-    let token: AuthToken = serde_json::from_str(&json).map_err(|e| e.to_string())?;
-    Ok(token.access_token)
+    let json = fs::read_to_string(file_path).ok()?;
+    let token: AuthToken = serde_json::from_str(&json).ok()?;
+    Some(token.access_token)
+}
+
+fn load_token_from_app(app: &AppHandle) -> Option<String> {
+    let dir = app.path().app_local_data_dir().ok()?;
+    let path = dir.join("secrets.json");
+    let bytes = fs::read(path).ok()?;
+    let map: HashMap<String, String> = serde_json::from_slice(&bytes).ok()?;
+    // Service name: "cipher-keyring", Account: "google"
+    map.get("cipher-keyring::google").cloned()
 }
 
 #[tauri::command]
@@ -24,8 +33,10 @@ pub async fn ac_get_suggestion(
     app: AppHandle,
     context: AutocompleteContext,
 ) -> Result<SuggestionResult, String> {
-    // 1. Get OAuth token from CCli
-    let token_string = load_token_from_file()?;
+    // 1. Get OAuth token (Priority: CLI > App UI)
+    let token_string = load_token_from_cli()
+        .or_else(|| load_token_from_app(&app))
+        .ok_or("Not logged in. Please run 'ccli login' or set Gemini API key in settings.")?;
 
     // 2. Construct optimized prompt
     let mut prompt = format!(
