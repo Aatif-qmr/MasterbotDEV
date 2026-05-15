@@ -25,6 +25,7 @@ import {
   vimCompartment,
 } from "../core/extensions/index";
 import { initVimGlobals, vimHandlersExtension } from "../core/vim";
+import { ghostTextExtension } from "../core/autocomplete/ghost-text-extension";
 
 initVimGlobals();
 import { resolveLanguage } from "../core/languageResolver";
@@ -170,6 +171,10 @@ export const EditorPane = forwardRef<EditorPaneHandle, Props>(
           close: () => onCloseRef.current?.(),
         })),
         ...buildSharedExtensions(),
+        ghostTextExtension({
+          getPath: () => pathRef.current,
+          getLanguage: () => languageRef.current,
+        }),
         languageCompartment.of([]),
         keymap.of([
           {

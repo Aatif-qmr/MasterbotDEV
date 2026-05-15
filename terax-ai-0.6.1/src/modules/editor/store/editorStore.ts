@@ -4,6 +4,8 @@ import { type WorkspaceLayout, type EditorPaneState, type InlineEdit } from '../
 interface EditorState {
   layout: WorkspaceLayout;
   activeEdits: Record<string, InlineEdit[]>;
+  enableGhostText: boolean;
+  setEnableGhostText: (enabled: boolean) => void;
   addPane: (direction: 'horizontal' | 'vertical') => void;
   closePane: (paneId: string) => void;
   setActivePane: (paneId: string) => void;
@@ -23,6 +25,9 @@ export const useEditorStore = create<EditorState>((set) => ({
     sizes: [100],
   },
   activeEdits: {},
+  enableGhostText: true,
+
+  setEnableGhostText: (enabled) => set({ enableGhostText: enabled }),
   
   addPane: (direction) => set((state) => {
     const newId = `pane-${Date.now()}`;

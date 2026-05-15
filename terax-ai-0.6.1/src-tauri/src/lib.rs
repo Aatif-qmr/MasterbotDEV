@@ -1,6 +1,6 @@
 mod modules;
 
-use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, auth, storage, time_travel, context};
+use modules::{fs, net, pty, secrets, shell, graphify, optimizer, core, auth, storage, time_travel, context, autocomplete};
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_window_state::StateFlags;
 
@@ -123,6 +123,7 @@ pub fn run() {
                     context::commands::ctx_search,
                     context::commands::ctx_get_file_context,
                     context::commands::ctx_get_project_summary,
+                    autocomplete::commands::ac_get_suggestion,
                 ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

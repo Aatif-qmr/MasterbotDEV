@@ -240,3 +240,21 @@ html[data-chrome="borderless"] *::-webkit-scrollbar {
   height: 0;
   display: none;
 }
+
+/* Ghost Text Autocomplete */
+.cm-ghost-text {
+  color: #94a3b8; /* Slate-400 */
+  opacity: 0.7;
+  pointer-events: none;
+  white-space: pre;
+}
+
+.cm-ghost-text.loading::after {
+  content: "…";
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
